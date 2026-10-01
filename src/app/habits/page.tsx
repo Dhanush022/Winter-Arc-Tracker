@@ -206,7 +206,7 @@ export default function HabitsPage() {
                       onClick={() => !isFuture && toggleHabit(habit.id, date)}
                       disabled={isFuture}
                       className={cn(
-                        "w-full aspect-square rounded transition-all text-xs",
+                        "w-full h-5 rounded transition-all text-[10px]",
                         completed
                           ? "bg-accent-teal/20 border border-accent-teal/40"
                           : isFuture
