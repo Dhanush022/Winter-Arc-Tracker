@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
+import LeaderboardList from "@/components/LeaderboardList";
 import { useRouter } from "next/navigation";
 import { getToday, getDayNumber, calculateStreak, cn } from "@/lib/utils";
 import { formatDate, getDateFromDay, getMonthFromDay } from "@/lib/utils";
 import { MONTHS, MAX_FREEZES } from "@/lib/types";
-import type { Habit, HabitLog, SleepLog, StreakFreeze, MacroLog, WeeklyCheckin, MonthlyReflection } from "@/lib/types";
+import type { Habit, HabitLog, SleepLog, StreakFreeze, MacroLog } from "@/lib/types";
 
 const HABIT_POINTS: Record<string, number> = {
   "Workout / Exercise": 15,
@@ -37,11 +38,8 @@ export default function DashboardPage() {
   const [activeMonth, setActiveMonth] = useState(getMonthFromDay(getDayNumber(getToday())));
   const [showFreezeModal, setShowFreezeModal] = useState(false);
 
-  // Check-in fields
+  // Sleep field
   const [sleepHours, setSleepHours] = useState("");
-  const [weight, setWeight] = useState("");
-  const [todayWin, setTodayWin] = useState("");
-  const [tomorrowFocus, setTomorrowFocus] = useState("");
   const [checkingIn, setCheckingIn] = useState(false);
 
   // Macro fields
@@ -52,25 +50,8 @@ export default function DashboardPage() {
   const [savingMacros, setSavingMacros] = useState(false);
   const [macroLogs, setMacroLogs] = useState<MacroLog[]>([]);
 
-  // Weekly check-in fields
-  const [weeklyWeight, setWeeklyWeight] = useState("");
-  const [weeklyWins, setWeeklyWins] = useState("");
-  const [weeklyFocus, setWeeklyFocus] = useState("");
-  const [savingWeekly, setSavingWeekly] = useState(false);
-  const [weeklyCheckins, setWeeklyCheckins] = useState<WeeklyCheckin[]>([]);
-
-  // Monthly reflection fields
-  const [monthlyWin, setMonthlyWin] = useState("");
-  const [monthlyLesson, setMonthlyLesson] = useState("");
-  const [monthlyImprove, setMonthlyImprove] = useState("");
-  const [monthlyGoal, setMonthlyGoal] = useState("");
-  const [savingMonthly, setSavingMonthly] = useState(false);
-  const [monthlyReflections, setMonthlyReflections] = useState<MonthlyReflection[]>([]);
-
   const today = getToday();
   const dayNumber = getDayNumber(today);
-  const currentWeek = Math.ceil(dayNumber / 7);
-  const currentMonthName = dayNumber <= 31 ? "october" : dayNumber <= 61 ? "november" : "december";
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -84,20 +65,19 @@ export default function DashboardPage() {
     const fetchData = async () => {
       setLoading(true);
 
-      const [habitsRes, logsRes, sleepRes, freezesRes, macrosRes, checkinsRes, reflectionsRes] = await Promise.all([
+      const [habitsRes, logsRes, sleepRes, freezesRes, macrosRes] = await Promise.all([
         supabase.from("habits").select("*").eq("user_id", user.id).order("order"),
         supabase.from("habit_logs").select("*").eq("user_id", user.id),
         supabase.from("sleep_logs").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(90),
         supabase.from("streak_freezes").select("*").eq("user_id", user.id),
         supabase.from("macro_logs").select("*").eq("user_id", user.id).eq("date", today),
-        supabase.from("weekly_checkins").select("*").eq("user_id", user.id).eq("week", currentWeek).maybeSingle(),
-        supabase.from("monthly_reflections").select("*").eq("user_id", user.id).eq("month", currentMonthName).maybeSingle(),
       ]);
 
       if (habitsRes.data) setHabits(habitsRes.data);
       if (logsRes.data) {
         setAllLogs(logsRes.data);
-        setStreak(calculateStreak(logsRes.data, habitsRes.data?.length ?? 0));
+        const count = (habitsRes.data ?? []).filter((h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))).length;
+        setStreak(calculateStreak(logsRes.data, count));
       }
       if (sleepRes.data) setSleepLogs(sleepRes.data);
       if (freezesRes.data) setFreezes(freezesRes.data);
@@ -112,28 +92,11 @@ export default function DashboardPage() {
         setMacroCalories(todayMacro.calories.toString());
       }
 
-      // Pre-fill weekly check-in
-      if (checkinsRes.data) {
-        setWeeklyCheckins([checkinsRes.data]);
-        setWeeklyWeight(checkinsRes.data.weight?.toString() || "");
-        setWeeklyWins(checkinsRes.data.wins || "");
-        setWeeklyFocus(checkinsRes.data.focus || "");
-      }
-
-      // Pre-fill monthly reflection
-      if (reflectionsRes.data) {
-        setMonthlyReflections([reflectionsRes.data]);
-        setMonthlyWin(reflectionsRes.data.win || "");
-        setMonthlyLesson(reflectionsRes.data.lesson || "");
-        setMonthlyImprove(reflectionsRes.data.improve || "");
-        setMonthlyGoal(reflectionsRes.data.next_goal || "");
-      }
-
       setLoading(false);
     };
 
     fetchData();
-  }, [user, today, currentWeek, currentMonthName]);
+  }, [user, today]);
 
   const toggleHabit = async (habitId: string) => {
     const existing = allLogs.find((l) => l.habit_id === habitId && l.date === today);
@@ -206,40 +169,11 @@ export default function DashboardPage() {
     if (sleepHours) {
       const existing = sleepLogs.find((s) => s.date === today);
       if (existing) {
-        await supabase.from("sleep_logs").update({ hours: Number(sleepHours) }).eq("id", existing.id);
-        setSleepLogs((prev) => prev.map((s) => s.id === existing.id ? { ...s, hours: Number(sleepHours) } : s));
+        await supabase.from("sleep_logs").update({ hours: Math.max(0, Number(sleepHours)) }).eq("id", existing.id);
+        setSleepLogs((prev) => prev.map((s) => s.id === existing.id ? { ...s, hours: Math.max(0, Number(sleepHours)) } : s));
       } else {
-        const { data } = await supabase.from("sleep_logs").insert({ user_id: user!.id, date: today, hours: Number(sleepHours) }).select().single();
+        const { data } = await supabase.from("sleep_logs").insert({ user_id: user!.id, date: today, hours: Math.max(0, Number(sleepHours)) }).select().single();
         if (data) setSleepLogs((prev) => [data, ...prev]);
-      }
-    }
-
-    if (weight || todayWin || tomorrowFocus) {
-      const week = Math.ceil(dayNumber / 7);
-      const { data: existingCheckin } = await supabase
-        .from("weekly_checkins")
-        .select("*")
-        .eq("user_id", user!.id)
-        .eq("week", week)
-        .maybeSingle();
-
-      if (existingCheckin) {
-        await supabase
-          .from("weekly_checkins")
-          .update({
-            weight: weight ? Number(weight) : existingCheckin.weight,
-            wins: todayWin || existingCheckin.wins,
-            focus: tomorrowFocus || existingCheckin.focus,
-          })
-          .eq("id", existingCheckin.id);
-      } else {
-        await supabase.from("weekly_checkins").insert({
-          user_id: user!.id,
-          week,
-          weight: weight ? Number(weight) : null,
-          wins: todayWin,
-          focus: tomorrowFocus,
-        });
       }
     }
 
@@ -252,84 +186,34 @@ export default function DashboardPage() {
 
     if (existing) {
       const { error } = await supabase.from("macro_logs").update({
-        protein: Number(macroProtein) || 0,
-        carbs: Number(macroCarbs) || 0,
-        fat: Number(macroFat) || 0,
-        calories: Number(macroCalories) || 0,
+        protein: Math.max(0, Number(macroProtein) || 0),
+        carbs: Math.max(0, Number(macroCarbs) || 0),
+        fat: Math.max(0, Number(macroFat) || 0),
+        calories: Math.max(0, Number(macroCalories) || 0),
       }).eq("id", existing.id);
 
       if (!error) {
         setMacroLogs((prev) => prev.map((m) => m.id === existing.id ? {
           ...m,
-          protein: Number(macroProtein) || 0,
-          carbs: Number(macroCarbs) || 0,
-          fat: Number(macroFat) || 0,
-          calories: Number(macroCalories) || 0,
+          protein: Math.max(0, Number(macroProtein) || 0),
+          carbs: Math.max(0, Number(macroCarbs) || 0),
+          fat: Math.max(0, Number(macroFat) || 0),
+          calories: Math.max(0, Number(macroCalories) || 0),
         } : m));
       }
     } else {
       const { data, error } = await supabase.from("macro_logs").insert({
         user_id: user!.id,
         date: today,
-        protein: Number(macroProtein) || 0,
-        carbs: Number(macroCarbs) || 0,
-        fat: Number(macroFat) || 0,
-        calories: Number(macroCalories) || 0,
+        protein: Math.max(0, Number(macroProtein) || 0),
+        carbs: Math.max(0, Number(macroCarbs) || 0),
+        fat: Math.max(0, Number(macroFat) || 0),
+        calories: Math.max(0, Number(macroCalories) || 0),
       }).select().single();
 
       if (data && !error) setMacroLogs((prev) => [...prev, data]);
     }
     setSavingMacros(false);
-  };
-
-  const saveWeeklyCheckin = async () => {
-    setSavingWeekly(true);
-    const existing = weeklyCheckins.find((c) => c.week === currentWeek);
-
-    if (existing) {
-      await supabase.from("weekly_checkins").update({
-        weight: weeklyWeight ? Number(weeklyWeight) : null,
-        wins: weeklyWins,
-        focus: weeklyFocus,
-      }).eq("id", existing.id);
-    } else {
-      const { data } = await supabase.from("weekly_checkins").insert({
-        user_id: user!.id,
-        week: currentWeek,
-        weight: weeklyWeight ? Number(weeklyWeight) : null,
-        wins: weeklyWins,
-        focus: weeklyFocus,
-      }).select().single();
-
-      if (data) setWeeklyCheckins((prev) => [...prev, data]);
-    }
-    setSavingWeekly(false);
-  };
-
-  const saveMonthlyReflection = async () => {
-    setSavingMonthly(true);
-    const existing = monthlyReflections.find((r) => r.month === currentMonthName);
-
-    if (existing) {
-      await supabase.from("monthly_reflections").update({
-        win: monthlyWin,
-        lesson: monthlyLesson,
-        improve: monthlyImprove,
-        next_goal: monthlyGoal,
-      }).eq("id", existing.id);
-    } else {
-      const { data } = await supabase.from("monthly_reflections").insert({
-        user_id: user!.id,
-        month: currentMonthName,
-        win: monthlyWin,
-        lesson: monthlyLesson,
-        improve: monthlyImprove,
-        next_goal: monthlyGoal,
-      }).select().single();
-
-      if (data) setMonthlyReflections((prev) => [...prev, data]);
-    }
-    setSavingMonthly(false);
   };
 
   if (authLoading || loading) {
@@ -344,12 +228,17 @@ export default function DashboardPage() {
 
   const todayLogs = allLogs.filter((l) => l.date === today);
   const completedToday = todayLogs.filter((l) => l.completed);
+
+  // Hide placeholder custom habits until the user names them in Profile
+  const visibleHabits = habits.filter(
+    (h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))
+  );
   const todayScore = completedToday.reduce((sum, l) => {
     const habit = habits.find((h) => h.id === l.habit_id);
     return sum + (habit ? HABIT_POINTS[habit.name] || 10 : 10);
   }, 0);
 
-  const completionPct = habits.length > 0 ? (completedToday.length / habits.length) * 100 : 0;
+  const completionPct = visibleHabits.length > 0 ? (completedToday.length / visibleHabits.length) * 100 : 0;
 
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
@@ -473,7 +362,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {habits.map((habit) => {
+              {visibleHabits.map((habit) => {
                 const log = todayLogs.find((l) => l.habit_id === habit.id);
                 const completed = log?.completed || false;
                 const points = HABIT_POINTS[habit.name] || 10;
@@ -524,7 +413,7 @@ export default function DashboardPage() {
                     <div className="w-full bg-surface-light rounded-sm overflow-hidden" style={{ height: "60px" }}>
                       <div
                         className="w-full bg-accent-teal/60 rounded-sm transition-all"
-                        style={{ height: `${habits.length > 0 ? (day.completed / habits.length) * 100 : 0}%`, marginTop: `${100 - (habits.length > 0 ? (day.completed / habits.length) * 100 : 0)}%` }}
+                        style={{ height: `${visibleHabits.length > 0 ? (day.completed / visibleHabits.length) * 100 : 0}%`, marginTop: `${100 - (visibleHabits.length > 0 ? (day.completed / visibleHabits.length) * 100 : 0)}%` }}
                       />
                     </div>
                     <span className="text-[10px] text-muted-dark">{day.day}</span>
@@ -550,74 +439,6 @@ export default function DashboardPage() {
                 ❄ Use Freeze ({freezesLeft} left)
               </button>
             </div>
-          </div>
-        </div>
-
-        {/* Daily Check-in */}
-        <div className="card p-5 mb-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-muted">🌙</span>
-                <span className="text-[10px] text-muted-dark tracking-widest">SLEEP</span>
-              </div>
-              <input
-                type="number"
-                placeholder="Hours"
-                value={sleepHours}
-                onChange={(e) => setSleepHours(e.target.value)}
-                className="input-field w-full"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-muted">⚖️</span>
-                <span className="text-[10px] text-muted-dark tracking-widest">WEIGHT</span>
-              </div>
-              <input
-                type="number"
-                placeholder="kg"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                className="input-field w-full"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-muted">🛡️</span>
-                <span className="text-[10px] text-muted-dark tracking-widest">TODAY&apos;S WIN</span>
-              </div>
-              <input
-                type="text"
-                placeholder="What moved forward?"
-                value={todayWin}
-                onChange={(e) => setTodayWin(e.target.value)}
-                className="input-field w-full"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-muted">🎯</span>
-                <span className="text-[10px] text-muted-dark tracking-widest">TOMORROW&apos;S FOCUS</span>
-              </div>
-              <input
-                type="text"
-                placeholder="One clear priority"
-                value={tomorrowFocus}
-                onChange={(e) => setTomorrowFocus(e.target.value)}
-                className="input-field w-full"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end mt-4">
-            <button
-              onClick={handleCheckin}
-              disabled={checkingIn}
-              className="btn-checkin flex items-center gap-2"
-            >
-              <span>+</span>
-              {checkingIn ? "Checking in..." : "Check in"}
-            </button>
           </div>
         </div>
 
@@ -656,7 +477,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Habit Rows */}
-              {habits.map((habit) => (
+              {visibleHabits.map((habit) => (
                 <div key={habit.id} className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-1">
                   <div className="text-sm text-muted font-medium truncate pr-2 flex items-center justify-between">
                     <span>{habit.name}</span>
@@ -709,9 +530,8 @@ export default function DashboardPage() {
             <div>
               <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">HOURS SLEPT</label>
               <input
-                type="number"
+                type="number" min="0"
                 step="0.5"
-                min="0"
                 max="24"
                 value={sleepHours}
                 onChange={(e) => setSleepHours(e.target.value)}
@@ -742,7 +562,7 @@ export default function DashboardPage() {
             <div>
               <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">PROTEIN (g)</label>
               <input
-                type="number"
+                type="number" min="0"
                 placeholder={macroTargets.protein.toString()}
                 value={macroProtein}
                 onChange={(e) => setMacroProtein(e.target.value)}
@@ -752,7 +572,7 @@ export default function DashboardPage() {
             <div>
               <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">CARBS (g)</label>
               <input
-                type="number"
+                type="number" min="0"
                 placeholder={macroTargets.carbs.toString()}
                 value={macroCarbs}
                 onChange={(e) => setMacroCarbs(e.target.value)}
@@ -762,7 +582,7 @@ export default function DashboardPage() {
             <div>
               <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">FAT (g)</label>
               <input
-                type="number"
+                type="number" min="0"
                 placeholder={macroTargets.fat.toString()}
                 value={macroFat}
                 onChange={(e) => setMacroFat(e.target.value)}
@@ -772,7 +592,7 @@ export default function DashboardPage() {
             <div>
               <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">CALORIES</label>
               <input
-                type="number"
+                type="number" min="0"
                 placeholder={macroTargets.calories.toString()}
                 value={macroCalories}
                 onChange={(e) => setMacroCalories(e.target.value)}
@@ -791,113 +611,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Weekly Check-in */}
-        <div className="card p-5 mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-white tracking-tight">WEEKLY CHECK-IN</h2>
-            <span className="text-xs text-muted-dark tracking-widest">WEEK {currentWeek}</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">WEIGHT (kg)</label>
-              <input
-                type="number"
-                step="0.1"
-                placeholder="70"
-                value={weeklyWeight}
-                onChange={(e) => setWeeklyWeight(e.target.value)}
-                className="input-field w-full"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">WINS</label>
-              <textarea
-                placeholder="What went well this week?"
-                value={weeklyWins}
-                onChange={(e) => setWeeklyWins(e.target.value)}
-                className="input-field w-full"
-                rows={2}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">FOCUS FOR NEXT WEEK</label>
-              <textarea
-                placeholder="What to focus on?"
-                value={weeklyFocus}
-                onChange={(e) => setWeeklyFocus(e.target.value)}
-                className="input-field w-full"
-                rows={2}
-              />
-            </div>
-          </div>
-          <div className="flex justify-end mt-4">
-            <button
-              onClick={saveWeeklyCheckin}
-              disabled={savingWeekly}
-              className="bg-accent-teal text-black font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-all"
-            >
-              {savingWeekly ? "Saving..." : "Save Check-in"}
-            </button>
-          </div>
-        </div>
-
-        {/* Monthly Reflection */}
-        <div className="card p-5 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-white tracking-tight">MONTHLY REFLECTION</h2>
-            <span className="text-xs text-muted-dark tracking-widest uppercase">{currentMonthName}</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">BIGGEST WIN</label>
-              <textarea
-                placeholder="What was your biggest win?"
-                value={monthlyWin}
-                onChange={(e) => setMonthlyWin(e.target.value)}
-                className="input-field w-full"
-                rows={3}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">BIGGEST LESSON</label>
-              <textarea
-                placeholder="What did you learn?"
-                value={monthlyLesson}
-                onChange={(e) => setMonthlyLesson(e.target.value)}
-                className="input-field w-full"
-                rows={3}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">WHAT TO IMPROVE</label>
-              <textarea
-                placeholder="What needs work?"
-                value={monthlyImprove}
-                onChange={(e) => setMonthlyImprove(e.target.value)}
-                className="input-field w-full"
-                rows={3}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">NEXT MONTH&apos;S GOAL</label>
-              <textarea
-                placeholder="What&apos;s your goal?"
-                value={monthlyGoal}
-                onChange={(e) => setMonthlyGoal(e.target.value)}
-                className="input-field w-full"
-                rows={3}
-              />
-            </div>
-          </div>
-          <div className="flex justify-end mt-4">
-            <button
-              onClick={saveMonthlyReflection}
-              disabled={savingMonthly}
-              className="bg-accent-teal text-black font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-all"
-            >
-              {savingMonthly ? "Saving..." : "Save Reflection"}
-            </button>
-          </div>
+        {/* Leaderboard */}
+        <div className="mb-8">
+          <div className="text-accent-orange text-xs tracking-widest mb-2">THE PUBLIC RANKS</div>
+          <h2 className="text-2xl font-black tracking-tight text-white mb-4">WHO KEPT THEIR WORD?</h2>
+          <LeaderboardList />
         </div>
 
         {/* Footer */}

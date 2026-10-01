@@ -188,7 +188,7 @@ export default function HabitsPage() {
             </div>
 
             {/* Habit Rows */}
-            {habits.map((habit) => (
+            {habits.filter((h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))).map((habit) => (
               <div key={habit.id} className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-1">
                 <div className="text-sm text-muted font-medium truncate pr-2 flex items-center justify-between">
                   <span>{habit.name}</span>

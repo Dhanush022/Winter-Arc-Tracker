@@ -30,6 +30,9 @@ export default function ProfilePage() {
 
   const [checkins, setCheckins] = useState<WeeklyCheckin[]>([]);
   const [reflections, setReflections] = useState<MonthlyReflection[]>([]);
+  const [customHabit1, setCustomHabit1] = useState("");
+  const [customHabit2, setCustomHabit2] = useState("");
+  const [customHabitIds, setCustomHabitIds] = useState<{ id: string }[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -51,6 +54,19 @@ export default function ProfilePage() {
         setCarbs(profile.macro_targets.carbs.toString());
         setFat(profile.macro_targets.fat.toString());
         setCalories(profile.macro_targets.calories.toString());
+      }
+
+      const { data: customHabits } = await supabase
+        .from("habits")
+        .select("id, name, \"order\"")
+        .eq("user_id", user.id)
+        .eq("custom", true)
+        .order("order");
+
+      if (customHabits && customHabits.length > 0) {
+        setCustomHabitIds(customHabits);
+        setCustomHabit1(customHabits[0]?.name || "");
+        setCustomHabit2(customHabits[1]?.name || "");
       }
 
       const { data: checkinsData } = await supabase
@@ -84,34 +100,47 @@ export default function ProfilePage() {
         avatar_color: avatarColor,
         goal_mode: goalMode,
         macro_targets: {
-          protein: Number(protein) || 0,
-          carbs: Number(carbs) || 0,
-          fat: Number(fat) || 0,
-          calories: Number(calories) || 0,
+          protein: Math.max(0, Number(protein) || 0),
+          carbs: Math.max(0, Number(carbs) || 0),
+          fat: Math.max(0, Number(fat) || 0),
+          calories: Math.max(0, Number(calories) || 0),
         },
       })
       .eq("id", user!.id);
 
     await refreshProfile();
+
+    // Save custom habit names
+    const updates = [customHabit1.trim(), customHabit2.trim()];
+    for (let i = 0; i < customHabitIds.length && i < 2; i++) {
+      if (updates[i]) {
+        await supabase
+          .from("habits")
+          .update({ name: updates[i] })
+          .eq("id", customHabitIds[i].id);
+      }
+    }
+
     setSaving(false);
   };
 
   const saveCheckin = async (week: number, field: string, value: string) => {
+    const safeValue = field === "weight" && value !== "" ? String(Math.max(0, Number(value) || 0)) : value;
     const existing = checkins.find((c) => c.week === week);
 
     if (existing) {
       await supabase
         .from("weekly_checkins")
-        .update({ [field]: value })
+        .update({ [field]: field === "weight" && safeValue !== "" ? Number(safeValue) : safeValue })
         .eq("id", existing.id);
 
       setCheckins((prev) =>
-        prev.map((c) => (c.id === existing.id ? { ...c, [field]: value } : c))
+        prev.map((c) => (c.id === existing.id ? { ...c, [field]: field === "weight" && safeValue !== "" ? Number(safeValue) : safeValue } : c))
       );
     } else {
       const { data } = await supabase
         .from("weekly_checkins")
-        .insert({ user_id: user!.id, week, [field]: value })
+        .insert({ user_id: user!.id, week, [field]: field === "weight" && safeValue !== "" ? Number(safeValue) : safeValue })
         .select()
         .single();
 
@@ -249,7 +278,7 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-[10px] text-muted-dark mb-1">Protein (g)</label>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={protein}
                       onChange={(e) => setProtein(e.target.value)}
                       className="input-field w-full"
@@ -258,7 +287,7 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-[10px] text-muted-dark mb-1">Carbs (g)</label>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={carbs}
                       onChange={(e) => setCarbs(e.target.value)}
                       className="input-field w-full"
@@ -267,7 +296,7 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-[10px] text-muted-dark mb-1">Fat (g)</label>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={fat}
                       onChange={(e) => setFat(e.target.value)}
                       className="input-field w-full"
@@ -276,7 +305,7 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-[10px] text-muted-dark mb-1">Calories</label>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={calories}
                       onChange={(e) => setCalories(e.target.value)}
                       className="input-field w-full"
@@ -284,6 +313,34 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
+
+            {/* Custom Habits */}
+            <div>
+              <label className="block text-xs text-muted-dark mb-2 tracking-widest">CUSTOM HABITS</label>
+              <p className="text-muted-dark text-[11px] mb-2">Name your two custom habits to show them on your dashboard.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] text-muted-dark mb-1">Custom Habit 1</label>
+                  <input
+                    type="text"
+                    value={customHabit1}
+                    onChange={(e) => setCustomHabit1(e.target.value)}
+                    placeholder="e.g. No Sugar"
+                    className="input-field w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-muted-dark mb-1">Custom Habit 2</label>
+                  <input
+                    type="text"
+                    value={customHabit2}
+                    onChange={(e) => setCustomHabit2(e.target.value)}
+                    placeholder="e.g. Cold Shower"
+                    className="input-field w-full"
+                  />
+                </div>
+              </div>
+            </div>
 
               <button onClick={saveProfile} disabled={saving} className="bg-accent-teal text-black font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-all">
                 {saving ? "Saving..." : "Save Profile"}
@@ -304,7 +361,7 @@ export default function ProfilePage() {
                     <div>
                       <label className="block text-[10px] text-muted-dark mb-1">Weight (kg)</label>
                       <input
-                        type="number"
+                        type="number" min="0"
                         step="0.1"
                         defaultValue={checkin?.weight || ""}
                         onBlur={(e) => saveCheckin(week, "weight", e.target.value)}

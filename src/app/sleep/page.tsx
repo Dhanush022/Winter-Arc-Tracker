@@ -57,16 +57,16 @@ export default function SleepPage() {
     if (existing) {
       await supabase
         .from("sleep_logs")
-        .update({ hours: Number(hours) || 0 })
+        .update({ hours: Math.max(0, Number(hours) || 0) })
         .eq("id", existing.id);
 
       setSleepLogs((prev) =>
-        prev.map((s) => (s.id === existing.id ? { ...s, hours: Number(hours) || 0 } : s))
+        prev.map((s) => (s.id === existing.id ? { ...s, hours: Math.max(0, Number(hours) || 0) } : s))
       );
     } else {
       const { data } = await supabase
         .from("sleep_logs")
-        .insert({ user_id: user!.id, date: selectedDate, hours: Number(hours) || 0 })
+        .insert({ user_id: user!.id, date: selectedDate, hours: Math.max(0, Number(hours) || 0) })
         .select()
         .single();
 
@@ -132,9 +132,8 @@ export default function SleepPage() {
             <div className="mb-4">
               <label className="block text-xs text-muted-dark mb-1">Hours Slept</label>
               <input
-                type="number"
+                type="number" min="0"
                 step="0.5"
-                min="0"
                 max="24"
                 value={hours}
                 onChange={(e) => setHours(e.target.value)}

@@ -72,17 +72,17 @@ export default function MacrosPage() {
       await supabase
         .from("macro_logs")
         .update({
-          protein: Number(protein) || 0,
-          carbs: Number(carbs) || 0,
-          fat: Number(fat) || 0,
-          calories: Number(calories) || 0,
+          protein: Math.max(0, Number(protein) || 0),
+          carbs: Math.max(0, Number(carbs) || 0),
+          fat: Math.max(0, Number(fat) || 0),
+          calories: Math.max(0, Number(calories) || 0),
         })
         .eq("id", existing.id);
 
       setMacroLogs((prev) =>
         prev.map((m) =>
           m.id === existing.id
-            ? { ...m, protein: Number(protein) || 0, carbs: Number(carbs) || 0, fat: Number(fat) || 0, calories: Number(calories) || 0 }
+            ? { ...m, protein: Math.max(0, Number(protein) || 0), carbs: Math.max(0, Number(carbs) || 0), fat: Math.max(0, Number(fat) || 0), calories: Math.max(0, Number(calories) || 0) }
             : m
         )
       );
@@ -92,10 +92,10 @@ export default function MacrosPage() {
         .insert({
           user_id: user!.id,
           date: selectedDate,
-          protein: Number(protein) || 0,
-          carbs: Number(carbs) || 0,
-          fat: Number(fat) || 0,
-          calories: Number(calories) || 0,
+          protein: Math.max(0, Number(protein) || 0),
+          carbs: Math.max(0, Number(carbs) || 0),
+          fat: Math.max(0, Number(fat) || 0),
+          calories: Math.max(0, Number(calories) || 0),
         })
         .select()
         .single();
@@ -163,7 +163,7 @@ export default function MacrosPage() {
               <div>
                 <label className="block text-xs text-muted-dark mb-1">Protein (g)</label>
                 <input
-                  type="number"
+                  type="number" min="0"
                   value={protein}
                   onChange={(e) => setProtein(e.target.value)}
                   placeholder={macroTargets.protein.toString()}
@@ -173,7 +173,7 @@ export default function MacrosPage() {
               <div>
                 <label className="block text-xs text-muted-dark mb-1">Carbs (g)</label>
                 <input
-                  type="number"
+                  type="number" min="0"
                   value={carbs}
                   onChange={(e) => setCarbs(e.target.value)}
                   placeholder={macroTargets.carbs.toString()}
@@ -183,7 +183,7 @@ export default function MacrosPage() {
               <div>
                 <label className="block text-xs text-muted-dark mb-1">Fat (g)</label>
                 <input
-                  type="number"
+                  type="number" min="0"
                   value={fat}
                   onChange={(e) => setFat(e.target.value)}
                   placeholder={macroTargets.fat.toString()}
@@ -193,7 +193,7 @@ export default function MacrosPage() {
               <div>
                 <label className="block text-xs text-muted-dark mb-1">Calories</label>
                 <input
-                  type="number"
+                  type="number" min="0"
                   value={calories}
                   onChange={(e) => setCalories(e.target.value)}
                   placeholder={macroTargets.calories.toString()}
