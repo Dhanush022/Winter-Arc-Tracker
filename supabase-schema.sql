@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   email TEXT NOT NULL,
   full_name TEXT NOT NULL,
   avatar_url TEXT,
-  avatar_color TEXT DEFAULT '#38bdf8',
+  avatar_color TEXT DEFAULT '#f97316',
   goal_mode TEXT DEFAULT 'maintain' CHECK (goal_mode IN ('bulk', 'cut', 'maintain')),
   macro_targets JSONB DEFAULT '{"protein": 150, "carbs": 250, "fat": 70, "calories": 2500}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -212,7 +212,7 @@ BEGIN
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-    '#38bdf8'
+    '#f97316'
   );
   RETURN NEW;
 END;

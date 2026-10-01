@@ -201,9 +201,9 @@ export default function SleepPage() {
                     <Line
                       type="monotone"
                       dataKey="hours"
-                      stroke="#64ffda"
+                      stroke="#f97316"
                       strokeWidth={2}
-                      dot={{ fill: "#64ffda", r: 3 }}
+                      dot={{ fill: "#f97316", r: 3 }}
                       name="Hours"
                     />
                   </LineChart>

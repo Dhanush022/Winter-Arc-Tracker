@@ -17,7 +17,7 @@ const config: Config = {
         muted: "#94a3b8",
         "muted-dark": "#64748b",
         accent: {
-          teal: "#64ffda",
+          teal: "#f97316",
           orange: "#f97316",
           amber: "#fbbf24",
         },

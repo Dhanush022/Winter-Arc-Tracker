@@ -19,7 +19,7 @@ function Crystal() {
       <mesh ref={mesh}>
         <icosahedronGeometry args={[1.5, 1]} />
         <MeshDistortMaterial
-          color="#38bdf8"
+          color="#9ca3af"
           transparent
           opacity={0.7}
           roughness={0.1}
@@ -45,12 +45,12 @@ function InnerCrystal() {
     <mesh ref={mesh}>
       <octahedronGeometry args={[0.8, 0]} />
       <meshStandardMaterial
-        color="#64ffda"
+        color="#f97316"
         transparent
         opacity={0.5}
         roughness={0}
         metalness={1}
-        emissive="#64ffda"
+        emissive="#f97316"
         emissiveIntensity={0.3}
       />
     </mesh>
@@ -62,8 +62,8 @@ export default function IceCrystal() {
     <div className="w-32 h-32 md:w-40 md:h-40">
       <Canvas camera={{ position: [0, 0, 4], fov: 45 }}>
         <ambientLight intensity={0.5} />
-        <pointLight position={[5, 5, 5]} intensity={1} color="#38bdf8" />
-        <pointLight position={[-5, -5, 5]} intensity={0.5} color="#64ffda" />
+        <pointLight position={[5, 5, 5]} intensity={1} color="#9ca3af" />
+        <pointLight position={[-5, -5, 5]} intensity={0.5} color="#f97316" />
         <Crystal />
         <InnerCrystal />
       </Canvas>

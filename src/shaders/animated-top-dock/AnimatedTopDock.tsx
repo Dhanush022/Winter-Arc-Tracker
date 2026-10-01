@@ -97,12 +97,12 @@ const VARIANT_ITEMS: Record<AnimatedTopDockVariant, readonly DockItem[]> = {
 const BRAND_MARK = (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <rect width="24" height="24" rx="5" fill="#0b0b0b" stroke="#2a2a2a" />
-    <g stroke="#64ffda" strokeWidth="1.7" strokeLinecap="round">
+    <g stroke="#f97316" strokeWidth="1.7" strokeLinecap="round">
       <path d="M12 4.5v15" />
       <path d="M5.5 8.25l13 7.5" />
       <path d="M18.5 8.25l-13 7.5" />
     </g>
-    <circle cx="12" cy="12" r="1.6" fill="#64ffda" />
+    <circle cx="12" cy="12" r="1.6" fill="#f97316" />
   </svg>
 );
 

@@ -105,7 +105,7 @@ body {
 
   .input-field:focus {
     outline: none;
-    border-color: #64ffda;
+    border-color: #f97316;
   }
 
   .input-field::placeholder {
@@ -125,8 +125,8 @@ body {
   }
 
   .habit-checkbox.checked {
-    background: #64ffda;
-    border-color: #64ffda;
+    background: #f97316;
+    border-color: #f97316;
   }
 
   .habit-checkbox.checked::after {
@@ -147,14 +147,14 @@ body {
 
 .progress-bar-fill {
   height: 100%;
-  background: #64ffda;
+  background: #f97316;
   border-radius: 2px;
   transition: width 0.3s ease;
 }
 
 /* Teal gradient text */
 .teal-gradient {
-  background: linear-gradient(135deg, #64ffda, #4dd0e1);
+  background: linear-gradient(135deg, #f97316, #fb923c);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

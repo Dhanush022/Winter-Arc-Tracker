@@ -36,7 +36,7 @@ export default function Navbar() {
         <div className="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-md bg-surface-light">
           <div
             className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-xs"
-            style={{ backgroundColor: profile?.avatar_color || "#64ffda" }}
+            style={{ backgroundColor: profile?.avatar_color || "#f97316" }}
           >
             {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || "U"}
           </div>

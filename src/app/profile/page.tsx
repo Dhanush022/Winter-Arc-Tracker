@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import type { WeeklyCheckin, MonthlyReflection } from "@/lib/types";
 
 const AVATAR_COLORS = [
-  "#64ffda", "#38bdf8", "#b388ff", "#ff80ab", "#f97316",
+  "#f97316", "#9ca3af", "#b388ff", "#ff80ab", "#f97316",
   "#ef4444", "#22c55e", "#eab308", "#ec4899", "#6366f1",
 ];
 
