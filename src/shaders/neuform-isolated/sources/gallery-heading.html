@@ -466,8 +466,7 @@ function drawTile(i, psi){
 
 function render(t){
   ctx.setTransform(1,0,0,1,0,0);
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0,0,W,H);
+  ctx.clearRect(0,0,W,H);
   ctx.imageSmoothingQuality = 'high';
 
   var spin = (t/DUR)*Math.PI*2;

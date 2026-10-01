@@ -295,7 +295,7 @@ export default function DashboardPage() {
                   brightness={1.0}
                 />
               </div>
-              <p className="text-muted text-sm my-6 max-w-md">
+              <p className="text-muted text-base md:text-lg my-6 max-w-md">
                 Keep every promise you make to yourself. Build streaks, protect them with limited freezes, and climb with your crew.
               </p>
               <div className="flex gap-8 mt-6">

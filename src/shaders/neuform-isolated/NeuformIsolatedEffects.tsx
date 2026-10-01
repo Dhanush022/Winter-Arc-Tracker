@@ -1629,10 +1629,10 @@ const EFFECTS = {
   galleryHeading: {
     title: "Gallery Heading canvas animation",
     source: galleryHeadingSource,
-    background: "#000000",
+    background: "transparent",
     theme: {
       lightBackground: "#f4f7fb",
-      darkBackground: "#000000",
+      darkBackground: "transparent",
     },
     transformSource: (source, mode) => transformGalleryHeadingSource(source, mode, GALLERY_HEADING_VARIANTS[GALLERY_HEADING_DEFAULTS.variant]),
     targets: [{ selector: "#stage", role: "background" }],
