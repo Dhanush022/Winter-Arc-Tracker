@@ -466,7 +466,16 @@ function drawTile(i, psi){
 
 function render(t){
   ctx.setTransform(1,0,0,1,0,0);
-  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#111111';
+  ctx.fillRect(0,0,W,H);
+  var dprG = Math.min(window.devicePixelRatio || 1, 2);
+  var gs = 40 * dprG;
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = dprG;
+  ctx.beginPath();
+  for (var gx = 0; gx <= W; gx += gs){ ctx.moveTo(gx, 0); ctx.lineTo(gx, H); }
+  for (var gy = 0; gy <= H; gy += gs){ ctx.moveTo(0, gy); ctx.lineTo(W, gy); }
+  ctx.stroke();
   ctx.imageSmoothingQuality = 'high';
 
   var spin = (t/DUR)*Math.PI*2;

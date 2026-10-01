@@ -277,52 +277,38 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
         <div className="card p-8 mb-6 grid-bg">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent-orange/30 text-accent-orange text-xs font-medium tracking-widest mb-4">
-                <span>❄</span>
-                THE SEASON OF DISCIPLINE
-              </div>
-              <div className="shader-frame w-full h-[320px] md:h-[420px] rounded-xl overflow-hidden">
-                <GalleryHeading
-                  variant="rising-diagonal"
-                  mode="dark"
-                  font="sans"
-                  weight="400"
-                  headlineSize={1.15}
-                  hue={0}
-                  saturation={1.0}
-                  brightness={1.0}
-                />
-              </div>
-              <p className="text-muted text-base md:text-lg my-6 max-w-md">
-                Keep every promise you make to yourself. Build streaks, protect them with limited freezes, and climb with your crew.
-              </p>
-              <div className="flex gap-8 mt-6">
-                <div>
-                  <div className="text-2xl font-bold text-white">{dayNumber}</div>
-                  <div className="text-[10px] text-muted-dark tracking-widest">DAY OF ARC</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">{streak}d</div>
-                  <div className="text-[10px] text-muted-dark tracking-widest">STREAK</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">{todayScore}</div>
-                  <div className="text-[10px] text-muted-dark tracking-widest">TODAY&apos;S PTS</div>
-                </div>
-              </div>
+          <div className="flex flex-col items-center text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent-orange/30 text-accent-orange text-xs font-medium tracking-widest mb-4">
+              <span>❄</span>
+              THE SEASON OF DISCIPLINE
             </div>
-            <div className="hidden lg:flex items-center justify-center">
-              <div className="w-48 h-48 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-accent-teal/10 to-transparent rounded-full blur-3xl" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-32 h-32 bg-gradient-to-br from-surface-light to-surface border border-surface-border rounded-2xl transform rotate-12 flex items-center justify-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-accent-teal/20 to-accent-teal/5 rounded-xl transform -rotate-6 flex items-center justify-center">
-                      <span className="text-4xl opacity-50">❄</span>
-                    </div>
-                  </div>
-                </div>
+            <div className="shader-frame w-full max-w-3xl h-[320px] md:h-[380px] rounded-xl overflow-hidden">
+              <GalleryHeading
+                variant="rising-diagonal"
+                mode="dark"
+                font="sans"
+                weight="400"
+                headlineSize={1.15}
+                hue={0}
+                saturation={1.0}
+                brightness={1.0}
+              />
+            </div>
+            <p className="text-muted text-base md:text-lg mt-4 max-w-xl">
+              Keep every promise you make to yourself. Build streaks, protect them with limited freezes, and climb with your crew.
+            </p>
+            <div className="flex gap-8 mt-4 justify-center">
+              <div>
+                <div className="text-2xl font-bold text-white">{dayNumber}</div>
+                <div className="text-[10px] text-muted-dark tracking-widest">DAY OF ARC</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{streak}d</div>
+                <div className="text-[10px] text-muted-dark tracking-widest">STREAK</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{todayScore}</div>
+                <div className="text-[10px] text-muted-dark tracking-widest">TODAY&apos;S PTS</div>
               </div>
             </div>
           </div>
