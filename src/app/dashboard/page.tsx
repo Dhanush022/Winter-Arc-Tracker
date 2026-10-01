@@ -278,23 +278,19 @@ export default function DashboardPage() {
         {/* Hero Section */}
         <div className="card p-8 mb-6 grid-bg">
           <div className="flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent-orange/30 text-accent-orange text-xs font-medium tracking-widest mb-4">
-              <span>❄</span>
-              THE SEASON OF DISCIPLINE
-            </div>
-            <div className="shader-frame w-full max-w-3xl h-[320px] md:h-[380px] rounded-xl overflow-hidden">
+            <div className="shader-frame w-full max-w-3xl h-[360px] md:h-[440px] rounded-xl overflow-hidden">
               <GalleryHeading
                 variant="rising-diagonal"
                 mode="dark"
                 font="sans"
                 weight="400"
-                headlineSize={1.15}
+                headlineSize={1.55}
                 hue={0}
                 saturation={1.0}
                 brightness={1.0}
               />
             </div>
-            <p className="text-muted text-base md:text-lg mt-4 max-w-xl">
+            <p className="text-muted text-base md:text-lg mt-1 max-w-xl">
               Keep every promise you make to yourself. Build streaks, protect them with limited freezes, and climb with your crew.
             </p>
             <div className="flex gap-8 mt-4 justify-center">
