@@ -32,6 +32,24 @@ body {
   background: #3a3a3a;
 }
 
+/* Winter dock: strip the demo section's bg/overlay/caption, pin the capsule to the top */
+.winter-dock .animated-top-dock-component {
+  background: transparent;
+  height: 72px;
+}
+
+.winter-dock .animated-top-dock-component::after {
+  display: none;
+}
+
+.winter-dock .animated-top-dock-component__caption {
+  display: none;
+}
+
+.winter-dock .animated-top-dock__nav {
+  top: 12px;
+}
+
 @layer utilities {
   .text-glow-teal {
     text-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
