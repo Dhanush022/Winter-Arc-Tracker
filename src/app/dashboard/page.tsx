@@ -5,6 +5,8 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 import LeaderboardList from "@/components/LeaderboardList";
+import { GalleryHeading } from "@/shaders/neuform-isolated/NeuformIsolatedEffects";
+import "@/shaders/threeui.css";
 import { useRouter } from "next/navigation";
 import { getToday, getDayNumber, calculateStreak, cn } from "@/lib/utils";
 import { formatDate, getDateFromDay, getMonthFromDay } from "@/lib/utils";
@@ -281,15 +283,22 @@ export default function DashboardPage() {
                 <span>❄</span>
                 THE SEASON OF DISCIPLINE
               </div>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-[0.9] mb-4">
-                <span className="text-white">DISCIPLINE</span>
-                <br />
-                <span className="teal-gradient">IN THE DARK.</span>
-              </h1>
-              <p className="text-muted text-sm mb-6 max-w-md">
+              <div className="shader-frame w-full h-[320px] md:h-[420px] rounded-xl overflow-hidden">
+                <GalleryHeading
+                  variant="rising-diagonal"
+                  mode="dark"
+                  font="sans"
+                  weight="400"
+                  headlineSize={1.15}
+                  hue={0}
+                  saturation={1.0}
+                  brightness={1.0}
+                />
+              </div>
+              <p className="text-muted text-sm my-6 max-w-md">
                 Keep every promise you make to yourself. Build streaks, protect them with limited freezes, and climb with your crew.
               </p>
-              <div className="flex gap-8">
+              <div className="flex gap-8 mt-6">
                 <div>
                   <div className="text-2xl font-bold text-white">{dayNumber}</div>
                   <div className="text-[10px] text-muted-dark tracking-widest">DAY OF ARC</div>
