@@ -144,7 +144,7 @@ export default function HabitsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-white">HABIT GRID</h1>
+            <h1 className="text-2xl font-bold tracking-tighter text-white">HABIT GRID</h1>
             <p className="text-muted text-xs mt-1">90 days of discipline</p>
           </div>
           <button

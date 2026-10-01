@@ -316,8 +316,8 @@ export default function DashboardPage() {
             <div className="text-accent-teal text-xs tracking-widest mb-1">
               TODAY · {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" }).toUpperCase()}
             </div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white">
-              HOLD THE LINE, {profile?.full_name?.split(" ")[0]?.toUpperCase() || "WARRIOR"}
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tighter text-white">
+              HOLD THE LINE, <span className="italic font-serif font-normal text-white/70">{profile?.full_name?.split(" ")[0]?.toUpperCase() || "WARRIOR"}</span>
             </h1>
           </div>
           <div className="flex gap-3 mt-4 sm:mt-0">
@@ -605,7 +605,7 @@ export default function DashboardPage() {
         {/* Leaderboard */}
         <div className="mb-8">
           <div className="text-accent-orange text-xs tracking-widest mb-2">THE PUBLIC RANKS</div>
-          <h2 className="text-2xl font-black tracking-tight text-white mb-4">WHO KEPT THEIR WORD?</h2>
+          <h2 className="text-2xl font-bold tracking-tighter text-white mb-4">WHO KEPT <span className="italic font-serif font-normal text-white/70">THEIR WORD?</span></h2>
           <LeaderboardList />
         </div>
 

@@ -193,7 +193,7 @@ export default function ProfilePage() {
 
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-black tracking-tight text-white">PROFILE</h1>
+          <h1 className="text-2xl font-bold tracking-tighter text-white">PROFILE</h1>
           <p className="text-muted text-xs mt-1">Manage your settings</p>
         </div>
 

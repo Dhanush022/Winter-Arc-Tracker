@@ -76,10 +76,10 @@ export default function LoginPage() {
               THE SEASON OF DISCIPLINE
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[0.9] mb-6">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.9] mb-6">
               <span className="text-white">DISCIPLINE</span>
               <br />
-              <span className="teal-gradient">IN THE DARK.</span>
+              <span className="teal-gradient italic font-serif font-normal">IN THE DARK.</span>
             </h1>
 
             <p className="text-muted text-lg mb-8 max-w-md">

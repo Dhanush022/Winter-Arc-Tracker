@@ -34,8 +34,8 @@ export default function LeaderboardPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="text-accent-orange text-xs tracking-widest mb-2">THE PUBLIC RANKS</div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-2">
-            WHO KEPT THEIR WORD?
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-white mb-2">
+            WHO KEPT <span className="italic font-serif font-normal text-white/70">THEIR WORD?</span>
           </h1>
           <div className="flex justify-center">
             <span className="text-accent-teal text-3xl">🏅</span>

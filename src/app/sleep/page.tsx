@@ -109,7 +109,7 @@ export default function SleepPage() {
 
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-black tracking-tight text-white">SLEEP</h1>
+          <h1 className="text-2xl font-bold tracking-tighter text-white">SLEEP</h1>
           <p className="text-muted text-xs mt-1">Track your nightly rest</p>
         </div>
 
