@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "./AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { calculateStreak, cn } from "@/lib/utils";
@@ -91,8 +92,9 @@ export default function LeaderboardList() {
   return (
     <div className="space-y-2">
       {entries.map((entry, index) => (
-        <div
+        <Link
           key={entry.user_id}
+          href={`/user/${entry.user_id}`}
           className={cn(
             "card p-4 flex items-center gap-4 card-hover",
             entry.user_id === user?.id && "border-accent-teal/30"
@@ -124,7 +126,7 @@ export default function LeaderboardList() {
               <span className="text-muted-dark text-sm"> pts</span>
             </div>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );
