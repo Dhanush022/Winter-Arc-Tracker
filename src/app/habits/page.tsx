@@ -224,6 +224,30 @@ export default function HabitsPage() {
         {/* Habit Grid */}
         <div className="card p-4 overflow-x-auto">
           <div className="min-w-[800px]">
+            {/* Month completion */}
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] text-muted-dark font-mono tracking-widest uppercase">
+                {MONTHS[activeMonth].name} Progress
+              </span>
+              <span className="text-[10px] text-accent-orange font-mono tracking-widest uppercase">
+                {logs.filter((l) => l.completed && getMonthDays(activeMonth).some((d) => formatDate(getDateFromDay(d)) === l.date)).length} cells
+              </span>
+            </div>
+            <div className="progress-bar mb-4">
+              <div
+                className="progress-bar-fill"
+                style={{
+                  width: `${Math.min(
+                    visibleHabits.length > 0
+                      ? (logs.filter((l) => l.completed && getMonthDays(activeMonth).some((d) => formatDate(getDateFromDay(d)) === l.date)).length /
+                          (visibleHabits.length * getMonthDays(activeMonth).length)) *
+                        100
+                      : 0,
+                    100
+                  )}%`,
+                }}
+              />
+            </div>
             {/* Header Row */}
             <div className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-2">
               <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono font-medium">HABIT</div>
