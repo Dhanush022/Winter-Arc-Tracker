@@ -84,7 +84,7 @@ export default function SleepPage() {
     : 0;
 
   const chartData = [...sleepLogs].reverse().map((s) => ({
-    date: s.date.slice(5),
+    date: new Date(s.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     hours: s.hours,
   }));
 

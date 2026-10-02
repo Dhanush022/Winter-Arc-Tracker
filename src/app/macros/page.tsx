@@ -121,7 +121,7 @@ export default function MacrosPage() {
     : [];
 
   const chartData = weeklyLogs.reverse().map((m) => ({
-    date: m.date.slice(5),
+    date: new Date(m.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     protein: m.protein,
     carbs: m.carbs,
     fat: m.fat,
