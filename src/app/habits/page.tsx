@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { getToday, getDayNumber, formatDate, getDateFromDay, getMonthFromDay, cn } from "@/lib/utils";
 import { MONTHS, MAX_FREEZES } from "@/lib/types";
 import type { Habit, HabitLog, StreakFreeze } from "@/lib/types";
@@ -30,6 +30,7 @@ export default function HabitsPage() {
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [freezes, setFreezes] = useState<StreakFreeze[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastAction, setLastAction] = useState("");
   const [activeMonth, setActiveMonth] = useState(getMonthFromDay(getDayNumber(getToday())));
   const [showFreezeModal, setShowFreezeModal] = useState(false);
 
@@ -93,6 +94,9 @@ export default function HabitsPage() {
         prev.map((l) => (l.id === existing.id ? { ...l, completed: newCompleted } : l))
       );
       router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
+      const habitName = habits.find((h) => h.id === habitId)?.name || "Habit";
+      setLastAction(newCompleted ? `✓ ${habitName} logged` : `⊘ ${habitName} unchecked`);
+      setTimeout(() => setLastAction(""), 1600);
     } else {
       const { data } = await supabase
         .from("habit_logs")
@@ -103,6 +107,9 @@ export default function HabitsPage() {
       if (data) {
         setLogs((prev) => [...prev, data]);
         router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
+        const habitName2 = habits.find((h) => h.id === habitId)?.name || "Habit";
+        setLastAction(`✓ ${habitName2} logged`);
+        setTimeout(() => setLastAction(""), 1600);
       }
     }
   };
@@ -166,42 +173,18 @@ export default function HabitsPage() {
           </button>
         </div>
 
-        {/* Today's Commitments */}
-        <div className="card p-5 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-white tracking-tight">TODAY&apos;S COMMITMENTS</h2>
-            <span className="text-[10px] text-muted-dark font-mono tracking-widest uppercase">
-              {logs.filter((l) => l.date === today && l.completed).length} / {visibleHabits.length} DONE
-            </span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {visibleHabits.map((habit) => {
-              const log = logs.find((l) => l.habit_id === habit.id && l.date === today);
-              const completed = log?.completed || false;
-              const points = HABIT_POINTS[habit.name] || 10;
-              return (
-                <motion.button
-                  key={habit.id}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => toggleHabit(habit.id, today)}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left group ${
-                    completed
-                      ? "border-accent-teal/30 bg-accent-teal/5"
-                      : "border-surface-border hover:border-accent-orange/40"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`habit-checkbox ${completed ? "checked" : ""}`} />
-                    <span className={`text-base ${completed ? "text-white" : "text-muted group-hover:text-foreground"}`}>
-                      {habit.name}
-                    </span>
-                  </div>
-                  <span className={`text-xs font-mono uppercase tracking-wider transition-colors ${completed ? "text-accent-orange" : "text-muted-dark"}`}>+{points}</span>
-                </motion.button>
-              );
-            })}
-          </div>
-        </div>
+        <AnimatePresence>
+          {lastAction && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-accent-teal/30 bg-accent-teal/5 text-accent-teal text-sm font-mono"
+            >
+              {lastAction}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Month Tabs */}
         <div className="flex gap-2 mb-4">
@@ -275,6 +258,8 @@ export default function HabitsPage() {
                     <motion.button
                       key={day}
                       whileTap={!isFuture ? { scale: 0.75 } : undefined}
+                      animate={completed ? { scale: [1, 1.3, 1] } : undefined}
+                      transition={{ duration: 0.3 }}
                       onClick={() => !isFuture && toggleHabit(habit.id, date)}
                       disabled={isFuture}
                       className={cn(
