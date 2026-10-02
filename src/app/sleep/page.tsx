@@ -90,11 +90,11 @@ export default function SleepPage() {
 
   const sleepDistribution = [
     { label: "10+ hrs", count: sleepLogs.filter((s) => s.hours >= 10).length, color: "bg-orange-300" },
-    { label: "9 hrs", count: sleepLogs.filter((s) => s.hours === 9).length, color: "bg-orange-400" },
-    { label: "8 hrs", count: sleepLogs.filter((s) => s.hours === 8).length, color: "bg-orange-500" },
-    { label: "7 hrs", count: sleepLogs.filter((s) => s.hours === 7).length, color: "bg-orange-600" },
-    { label: "6 hrs", count: sleepLogs.filter((s) => s.hours === 6).length, color: "bg-orange-700" },
-    { label: "<5 hrs", count: sleepLogs.filter((s) => s.hours < 5).length, color: "bg-neutral-600" },
+    { label: "9-10", count: sleepLogs.filter((s) => s.hours >= 9 && s.hours < 10).length, color: "bg-orange-400" },
+    { label: "8-9", count: sleepLogs.filter((s) => s.hours >= 8 && s.hours < 9).length, color: "bg-orange-500" },
+    { label: "7-8", count: sleepLogs.filter((s) => s.hours >= 7 && s.hours < 8).length, color: "bg-orange-600" },
+    { label: "6-7", count: sleepLogs.filter((s) => s.hours >= 6 && s.hours < 7).length, color: "bg-orange-700" },
+    { label: "<6 hrs", count: sleepLogs.filter((s) => s.hours < 6).length, color: "bg-neutral-600" },
   ];
 
   if (authLoading || loading) {
@@ -193,7 +193,7 @@ export default function SleepPage() {
                 {sleepDistribution.map((item) => (
                   <div key={item.label} className="flex items-center gap-2">
                     <span className="text-[10px] text-muted-dark font-mono w-12">{item.label}</span>
-                    <div className="flex-1 h-1.5 bg-surface-light rounded-full overflow-hidden">
+                    <div className="flex-1 h-2.5 bg-surface-light rounded-full overflow-hidden">
                       <div
                         className={cn("h-full rounded-full", item.color)}
                         style={{ width: `${sleepLogs.length > 0 ? (item.count / sleepLogs.length) * 100 : 0}%` }}
