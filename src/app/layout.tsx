@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "@/shaders/threeui.css";
 import { AuthProvider } from "@/components/AuthProvider";
+import PageTransition from "@/components/PageTransition";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,7 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          {children}
+          <PageTransition>{children}</PageTransition>
         </AuthProvider>
       </body>
     </html>

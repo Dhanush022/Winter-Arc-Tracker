@@ -7,14 +7,15 @@ import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
 import { getToday, getSleepColor } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Cell } from "recharts";
+import { getCached, setCached } from "@/lib/cache";
 import { motion, AnimatePresence } from "framer-motion";
 import type { SleepLog } from "@/lib/types";
 
 export default function SleepPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [sleepLogs, setSleepLogs] = useState<SleepLog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [sleepLogs, setSleepLogs] = useState<SleepLog[]>(() => getCached<SleepLog[]>("sleep") ?? []);
+  const [loading, setLoading] = useState(() => getCached("sleep") === undefined);
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [hours, setHours] = useState("");
   const [saving, setSaving] = useState(false);

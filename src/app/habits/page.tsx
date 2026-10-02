@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
+import { getCached, setCached } from "@/lib/cache";
 import { motion, AnimatePresence } from "framer-motion";
 import { getToday, getDayNumber, formatDate, getDateFromDay, getMonthFromDay, cn } from "@/lib/utils";
 import { MONTHS, MAX_FREEZES } from "@/lib/types";
@@ -26,10 +27,10 @@ const HABIT_POINTS: Record<string, number> = {
 export default function HabitsPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [logs, setLogs] = useState<HabitLog[]>([]);
-  const [freezes, setFreezes] = useState<StreakFreeze[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [habits, setHabits] = useState<Habit[]>(() => getCached<Habit[]>("habits_habits") ?? []);
+  const [logs, setLogs] = useState<HabitLog[]>(() => getCached<HabitLog[]>("habits_logs") ?? []);
+  const [freezes, setFreezes] = useState<StreakFreeze[]>(() => getCached<StreakFreeze[]>("habits_freezes") ?? []);
+  const [loading, setLoading] = useState(() => getCached("habits_logs") === undefined);
   const [lastAction, setLastAction] = useState("");
   const [activeMonth, setActiveMonth] = useState(getMonthFromDay(getDayNumber(getToday())));
   const [showFreezeModal, setShowFreezeModal] = useState(false);
@@ -56,21 +57,21 @@ export default function HabitsPage() {
         .eq("user_id", user.id)
         .order("order");
 
-      if (habitsData) setHabits(habitsData);
+      if (habitsData) { setHabits(habitsData); setCached("habits_habits", habitsData); }
 
       const { data: logsData } = await supabase
         .from("habit_logs")
         .select("*")
         .eq("user_id", user.id);
 
-      if (logsData) setLogs(logsData);
+      if (logsData) { setLogs(logsData); setCached("habits_logs", logsData); }
 
       const { data: freezesData } = await supabase
         .from("streak_freezes")
         .select("*")
         .eq("user_id", user.id);
 
-      if (freezesData) setFreezes(freezesData);
+      if (freezesData) { setFreezes(freezesData); setCached("habits_freezes", freezesData); }
 
       setLoading(false);
     };

@@ -50,21 +50,29 @@ body {
   top: 12px;
 }
 
-@media (max-width: 640px) {
-  .winter-dock .animated-top-dock-component {
-    height: 60px;
-  }
-  .winter-dock .animated-top-dock__nav {
-    top: 7px;
-    gap: 2px;
-    padding: 3px;
-  }
-  .winter-dock .animated-top-dock__link span:last-child {
-    display: none;
-  }
-  .winter-dock .animated-top-dock__item {
-    padding: 0 8px;
-  }
+/* Mobile: bottom Sable dock */
+.winter-dock-mobile .animated-top-dock-component {
+  height: 64px;
+  background: transparent;
+}
+.winter-dock-mobile .animated-top-dock-component::after {
+  display: none;
+}
+.winter-dock-mobile .animated-top-dock-component__caption {
+  display: none;
+}
+.winter-dock-mobile .animated-top-dock__nav {
+  position: absolute;
+  top: auto;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.winter-dock-mobile .animated-top-dock__link span:not(.animated-top-dock__icon) {
+  display: none;
+}
+.winter-dock-mobile .animated-top-dock__item {
+  padding: 0 6px;
 }
 
 @layer utilities {

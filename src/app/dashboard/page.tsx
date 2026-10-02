@@ -10,6 +10,7 @@ import "@/shaders/threeui.css";
 import { useRouter } from "next/navigation";
 import { getToday, getDayNumber, calculateStreak, cn } from "@/lib/utils";
 import { MAX_FREEZES } from "@/lib/types";
+import { getCached, setCached } from "@/lib/cache";
 import { motion } from "framer-motion";
 import type { Habit, HabitLog, SleepLog, StreakFreeze, MacroLog } from "@/lib/types";
 
@@ -31,12 +32,12 @@ const MAX_DAILY_SCORE = 110;
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [allLogs, setAllLogs] = useState<HabitLog[]>([]);
-  const [sleepLogs, setSleepLogs] = useState<SleepLog[]>([]);
-  const [freezes, setFreezes] = useState<StreakFreeze[]>([]);
+  const [habits, setHabits] = useState<Habit[]>(() => getCached<{ habits: Habit[] }>("dashboard")?.habits ?? []);
+  const [allLogs, setAllLogs] = useState<HabitLog[]>(() => getCached<{ allLogs: HabitLog[] }>("dashboard")?.allLogs ?? []);
+  const [sleepLogs, setSleepLogs] = useState<SleepLog[]>(() => getCached<{ sleepLogs: SleepLog[] }>("dashboard")?.sleepLogs ?? []);
+  const [freezes, setFreezes] = useState<StreakFreeze[]>(() => getCached<{ freezes: StreakFreeze[] }>("dashboard")?.freezes ?? []);
   const [streak, setStreak] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => getCached("dashboard") === undefined);
   const [showFreezeModal, setShowFreezeModal] = useState(false);
   const [todayWorkout, setTodayWorkout] = useState("");
 
@@ -52,7 +53,7 @@ export default function DashboardPage() {
   const [macroFat, setMacroFat] = useState("");
   const [macroCalories, setMacroCalories] = useState("");
   const [savingMacros, setSavingMacros] = useState(false);
-  const [macroLogs, setMacroLogs] = useState<MacroLog[]>([]);
+  const [macroLogs, setMacroLogs] = useState<MacroLog[]>(() => getCached<{ macroLogs: MacroLog[] }>("dashboard")?.macroLogs ?? []);
 
   const today = getToday();
   const dayNumber = getDayNumber(today);
@@ -95,6 +96,7 @@ export default function DashboardPage() {
       }
 
       setLoading(false);
+      setCached("dashboard", { habits: habitsRes.data ?? [], allLogs: logsRes.data ?? [], sleepLogs: sleepRes.data ?? [], freezes: freezesRes.data ?? [], macroLogs: macrosRes.data ?? [] });
     };
 
     fetchData();

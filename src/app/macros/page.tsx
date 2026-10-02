@@ -7,14 +7,15 @@ import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
 import { getToday } from "@/lib/utils";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { getCached, setCached } from "@/lib/cache";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MacroLog } from "@/lib/types";
 
 export default function MacrosPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [macroLogs, setMacroLogs] = useState<MacroLog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [macroLogs, setMacroLogs] = useState<MacroLog[]>(() => getCached<MacroLog[]>("macros") ?? []);
+  const [loading, setLoading] = useState(() => getCached("macros") === undefined);
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [protein, setProtein] = useState("");
   const [carbs, setCarbs] = useState("");
