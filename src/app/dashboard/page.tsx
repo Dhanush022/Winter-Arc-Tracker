@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { getToday, getDayNumber, calculateStreak, cn } from "@/lib/utils";
 import { formatDate, getDateFromDay, getMonthFromDay } from "@/lib/utils";
 import { MONTHS, MAX_FREEZES } from "@/lib/types";
+import { motion } from "framer-motion";
 import type { Habit, HabitLog, SleepLog, StreakFreeze, MacroLog } from "@/lib/types";
 
 const HABIT_POINTS: Record<string, number> = {
@@ -39,6 +40,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activeMonth, setActiveMonth] = useState(getMonthFromDay(getDayNumber(getToday())));
   const [showFreezeModal, setShowFreezeModal] = useState(false);
+  const [todayWorkout, setTodayWorkout] = useState("");
 
   // Sleep field
   const [sleepHours, setSleepHours] = useState("");
@@ -383,6 +385,23 @@ export default function DashboardPage() {
 
           {/* Right Sidebar */}
           <div className="space-y-4">
+            {/* Streak Freeze squeeze */}
+            <div className="card px-4 py-3 flex items-center justify-between">
+              <span className="text-[10px] text-muted-dark font-mono tracking-widest uppercase">❄ Freezes Left: <span className="text-white font-bold">{freezesLeft}</span></span>
+              <button
+                onClick={() => setShowFreezeModal(true)}
+                disabled={freezesLeft <= 0}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                  freezesLeft > 0
+                    ? "bg-accent-teal text-black hover:opacity-90"
+                    : "border border-surface-border text-muted-dark cursor-not-allowed"
+                )}
+              >
+                Use Freeze
+              </button>
+            </div>
+
             {/* Today's Score */}
             <div className="card p-5">
               <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono mb-2">TODAY&apos;S SCORE</div>
@@ -413,22 +432,34 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Streak Freeze */}
+            {/* Today's Workout */}
             <div className="card p-5">
-              <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono mb-2">STREAK FREEZE</div>
-              <p className="text-muted text-xs mb-3">Protect your streak for one day. Limited uses.</p>
-              <button
-                onClick={() => setShowFreezeModal(true)}
-                disabled={freezesLeft <= 0}
-                className={cn(
-                  "w-full px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                  freezesLeft > 0
-                    ? "border border-accent-teal/30 text-accent-teal hover:bg-accent-teal/5"
-                    : "border border-surface-border text-muted-dark cursor-not-allowed"
-                )}
+              <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono mb-2">TODAY&apos;S WORKOUT</div>
+              <select
+                value={todayWorkout}
+                onChange={(e) => setTodayWorkout(e.target.value)}
+                className="input-field w-full text-base font-semibold appearance-none cursor-pointer"
               >
-                ❄ Use Freeze ({freezesLeft} left)
-              </button>
+                <option value="">Select split…</option>
+                <option value="Push">Push</option>
+                <option value="Pull">Pull</option>
+                <option value="Legs">Legs</option>
+                <option value="Upper">Upper</option>
+                <option value="Lower">Lower</option>
+                <option value="Back & Triceps">Back &amp; Triceps</option>
+                <option value="Chest & Biceps">Chest &amp; Biceps</option>
+                <option value="Shoulders">Shoulders</option>
+                <option value="Arms">Arms</option>
+              </select>
+              {todayWorkout && (
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 text-sm text-accent-orange font-mono"
+                >
+                  ▸ {todayWorkout} day — go earn it.
+                </motion.p>
+              )}
             </div>
           </div>
         </div>
