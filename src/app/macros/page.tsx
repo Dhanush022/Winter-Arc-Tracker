@@ -313,7 +313,6 @@ export default function MacrosPage() {
                           const grams = name === "Fat" ? currentMacros!.fat : name === "Carbs" ? currentMacros!.carbs : currentMacros!.protein;
                           return [`${grams}g · ${value} kcal`, name] as [string, string];
                         }}
-                        unit=""
                       />
                       <Legend />
                     </PieChart>
