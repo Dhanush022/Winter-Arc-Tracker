@@ -17,7 +17,7 @@ const AVATAR_COLORS = [
 export default function ProfilePage() {
   const { user, profile, loading: authLoading, refreshProfile } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "checkins" | "reflections">("profile");
 
@@ -170,13 +170,6 @@ export default function ProfilePage() {
     }
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-accent-teal text-xl">Loading...</div>
-      </div>
-    );
-  }
 
   if (!user) return null;
 

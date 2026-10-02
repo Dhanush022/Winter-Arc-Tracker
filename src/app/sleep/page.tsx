@@ -15,7 +15,7 @@ export default function SleepPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [sleepLogs, setSleepLogs] = useState<SleepLog[]>(() => getCached<SleepLog[]>("sleep") ?? []);
-  const [loading, setLoading] = useState(() => getCached("sleep") === undefined);
+  const [, setLoading] = useState(() => getCached("sleep") === undefined);
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [hours, setHours] = useState("");
   const [saving, setSaving] = useState(false);
@@ -103,13 +103,6 @@ export default function SleepPage() {
     { label: "<6 hrs", count: sleepLogs.filter((s) => s.hours < 6).length, color: "#525252" },
   ];
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-accent-teal text-xl">Loading...</div>
-      </div>
-    );
-  }
 
   if (!user) return null;
 

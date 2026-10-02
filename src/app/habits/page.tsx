@@ -30,7 +30,7 @@ export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>(() => getCached<Habit[]>("habits_habits") ?? []);
   const [logs, setLogs] = useState<HabitLog[]>(() => getCached<HabitLog[]>("habits_logs") ?? []);
   const [freezes, setFreezes] = useState<StreakFreeze[]>(() => getCached<StreakFreeze[]>("habits_freezes") ?? []);
-  const [loading, setLoading] = useState(() => getCached("habits_logs") === undefined);
+  const [, setLoading] = useState(() => getCached("habits_logs") === undefined);
   const [lastAction, setLastAction] = useState("");
   const [activeMonth, setActiveMonth] = useState(getMonthFromDay(getDayNumber(getToday())));
   const [showFreezeModal, setShowFreezeModal] = useState(false);
@@ -143,13 +143,6 @@ export default function HabitsPage() {
 
   const freezesLeft = MAX_FREEZES - freezes.length;
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-accent-teal text-xl">Loading...</div>
-      </div>
-    );
-  }
 
   if (!user) return null;
 

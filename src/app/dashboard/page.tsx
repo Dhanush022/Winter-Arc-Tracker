@@ -37,7 +37,7 @@ export default function DashboardPage() {
   const [sleepLogs, setSleepLogs] = useState<SleepLog[]>(() => getCached<{ sleepLogs: SleepLog[] }>("dashboard")?.sleepLogs ?? []);
   const [freezes, setFreezes] = useState<StreakFreeze[]>(() => getCached<{ freezes: StreakFreeze[] }>("dashboard")?.freezes ?? []);
   const [streak, setStreak] = useState(0);
-  const [loading, setLoading] = useState(() => getCached("dashboard") === undefined);
+  const [, setLoading] = useState(() => getCached("dashboard") === undefined);
   const [showFreezeModal, setShowFreezeModal] = useState(false);
   const [todayWorkout, setTodayWorkout] = useState("");
 
@@ -218,13 +218,6 @@ export default function DashboardPage() {
     router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-accent-teal text-xl">Loading...</div>
-      </div>
-    );
-  }
 
   if (!user) return null;
 

@@ -8,6 +8,17 @@ import { supabase } from "@/lib/supabase";
 import { calculateStreak } from "@/lib/utils";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import type { UserProfile, Habit, HabitLog, SleepLog, MacroLog, WeeklyCheckin, StreakFreeze } from "@/lib/types";
+import { getCached, setCached } from "@/lib/cache";
+
+interface PageCache {
+  profile: UserProfile | null;
+  habits: Habit[];
+  logs: HabitLog[];
+  sleeps: SleepLog[];
+  macros: MacroLog[];
+  checkins: WeeklyCheckin[];
+  freezes: StreakFreeze[];
+}
 
 export default function UserSummaryPage() {
   const params = useParams();
@@ -15,14 +26,17 @@ export default function UserSummaryPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [logs, setLogs] = useState<HabitLog[]>([]);
-  const [sleeps, setSleeps] = useState<SleepLog[]>([]);
-  const [macros, setMacros] = useState<MacroLog[]>([]);
-  const [checkins, setCheckins] = useState<WeeklyCheckin[]>([]);
-  const [freezes, setFreezes] = useState<StreakFreeze[]>([]);
+
+  const cacheKey = `user_${userId}`;
+  const cached = getCached<PageCache>(cacheKey);
+  const [loading, setLoading] = useState(!cached);
+  const [profile, setProfile] = useState<UserProfile | null>(cached?.profile ?? null);
+  const [habits, setHabits] = useState<Habit[]>(cached?.habits ?? []);
+  const [logs, setLogs] = useState<HabitLog[]>(cached?.logs ?? []);
+  const [sleeps, setSleeps] = useState<SleepLog[]>(cached?.sleeps ?? []);
+  const [macros, setMacros] = useState<MacroLog[]>(cached?.macros ?? []);
+  const [checkins, setCheckins] = useState<WeeklyCheckin[]>(cached?.checkins ?? []);
+  const [freezes, setFreezes] = useState<StreakFreeze[]>(cached?.freezes ?? []);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/");
@@ -48,14 +62,30 @@ export default function UserSummaryPage() {
       setCheckins(c.data || []);
       setFreezes(f.data || []);
       setLoading(false);
+      setCached(cacheKey, {
+        profile: p.data ?? null,
+        habits: h.data || [],
+        logs: l.data || [],
+        sleeps: s.data || [],
+        macros: m.data || [],
+        checkins: c.data || [],
+        freezes: f.data || [],
+      });
     };
     fetchAll();
   }, [user, userId]);
 
   if (authLoading || loading || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-accent-orange text-xl">Loading...</div>
+      <div className="min-h-screen pt-16 sm:pt-20 pb-24 sm:pb-8 px-4 max-w-5xl mx-auto animate-pulse">
+        <div className="card p-5 h-24 mb-4" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="card p-5 h-28" />
+          <div className="card p-5 h-28" />
+          <div className="card p-5 h-28" />
+          <div className="card p-5 h-28" />
+        </div>
+        <div className="card p-5 h-48" />
       </div>
     );
   }

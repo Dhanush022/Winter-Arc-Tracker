@@ -15,7 +15,7 @@ export default function MacrosPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const router = useRouter();
   const [macroLogs, setMacroLogs] = useState<MacroLog[]>(() => getCached<MacroLog[]>("macros") ?? []);
-  const [loading, setLoading] = useState(() => getCached("macros") === undefined);
+  const [, setLoading] = useState(() => getCached("macros") === undefined);
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [protein, setProtein] = useState("");
   const [carbs, setCarbs] = useState("");
@@ -133,13 +133,6 @@ export default function MacrosPage() {
     fat: m.fat,
   }));
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-accent-teal text-xl">Loading...</div>
-      </div>
-    );
-  }
 
   if (!user) return null;
 
