@@ -45,7 +45,6 @@ export default function HabitsPage() {
     if (!user) return;
 
     const fetchData = async () => {
-      setLoading(true);
 
       const { data: habitsData } = await supabase
         .from("habits")
