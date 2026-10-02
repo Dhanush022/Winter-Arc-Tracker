@@ -309,9 +309,9 @@ export default function MacrosPage() {
                       </Pie>
                       <Tooltip
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "8px" }}
-                        formatter={(value: number, name: string) => {
+                        formatter={(value, name) => {
                           const grams = name === "Fat" ? currentMacros!.fat : name === "Carbs" ? currentMacros!.carbs : currentMacros!.protein;
-                          return [`${grams}g · ${value} kcal`, name];
+                          return [`${grams}g · ${value} kcal`, name] as [string, string];
                         }}
                         unit=""
                       />
