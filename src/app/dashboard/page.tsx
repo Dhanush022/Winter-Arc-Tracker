@@ -276,7 +276,7 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
-        <div className="card p-8 mb-6 grid-bg">
+        <div className="card p-5 sm:p-8 mb-6 grid-bg">
           <div className="flex flex-col items-center text-center">
             <div className="shader-frame w-full max-w-2xl h-[250px] md:h-[300px] rounded-xl overflow-hidden">
               <GalleryHeading
@@ -293,7 +293,7 @@ export default function DashboardPage() {
             <p className="text-muted text-base md:text-lg mt-2 max-w-xl">
               Keep every promise you make to yourself. Build streaks, protect them with limited freezes, and climb with your crew.
             </p>
-            <div className="flex gap-8 mt-2 justify-center">
+            <div className="flex gap-4 sm:gap-8 mt-2 justify-center">
               <div>
                 <div className="text-2xl font-bold text-white">{dayNumber}</div>
                 <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">DAY OF ARC</div>

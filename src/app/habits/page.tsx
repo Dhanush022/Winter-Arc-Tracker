@@ -161,7 +161,7 @@ export default function HabitsPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
           <div>
             <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// DAILY OATH</div>
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">Habits<span className="text-accent-orange">.</span></h1>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-white uppercase">Habits<span className="text-accent-orange">.</span></h1>
             <p className="text-muted text-sm mt-2">90 days of discipline</p>
           </div>
           <button

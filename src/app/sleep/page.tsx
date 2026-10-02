@@ -117,7 +117,7 @@ export default function SleepPage() {
         <div className="mb-8 flex items-end justify-between">
           <div>
             <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// NIGHTLY REST</div>
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">Sleep<span className="text-accent-orange">.</span></h1>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-white uppercase">Sleep<span className="text-accent-orange">.</span></h1>
           </div>
           <div className="hidden md:block text-right font-mono text-[10px] text-muted-dark font-mono tracking-widest font-mono">
             {sleepLogs.length} NIGHTS LOGGED<br />AVG {avgSleep.toFixed(1)}H

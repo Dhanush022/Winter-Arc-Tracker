@@ -192,7 +192,7 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// ACCOUNT</div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">Profile<span className="text-accent-orange">.</span></h1>
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-white uppercase">Profile<span className="text-accent-orange">.</span></h1>
           <p className="text-muted text-sm mt-2">Manage your settings</p>
         </div>
 

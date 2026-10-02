@@ -147,7 +147,7 @@ export default function MacrosPage() {
         <div className="mb-8 flex items-end justify-between">
           <div>
             <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// FUEL INTAKE</div>
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">Macros<span className="text-accent-orange">.</span></h1>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-white uppercase">Macros<span className="text-accent-orange">.</span></h1>
           </div>
           <div className="hidden md:block text-right font-mono text-[10px] text-muted-dark font-mono tracking-widest font-mono">
             TARGET {macroTargets.protein}P · {macroTargets.carbs}C · {macroTargets.fat}F<br />{macroTargets.calories} KCAL

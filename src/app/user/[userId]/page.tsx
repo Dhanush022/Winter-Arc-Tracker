@@ -111,7 +111,7 @@ export default function UserSummaryPage() {
               {profile.full_name.charAt(0)}
             </div>
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-white">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tighter text-white truncate">
                 {profile.full_name}<span className="text-accent-orange">.</span>
               </h1>
               <p className="text-muted text-sm font-mono uppercase tracking-wider">
