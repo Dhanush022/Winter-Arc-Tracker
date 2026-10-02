@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -45,6 +46,13 @@ export default function LoginPage() {
     if (isSignUp) {
       const { error } = await signUpWithEmail(email, password, name);
       if (error) setError(error.message);
+      else {
+        setSuccess("Account created. Check your email for a confirmation link before signing in.");
+        setEmail("");
+        setPassword("");
+        setName("");
+        setIsSignUp(false);
+      }
     } else {
       const { error } = await signInWithEmail(email, password);
       if (error) setError(error.message);
@@ -155,6 +163,10 @@ export default function LoginPage() {
                   <p className="text-red-400 text-sm">{error}</p>
                 )}
 
+                {success && (
+                  <p className="text-green-400 text-sm">{success}</p>
+                )}
+
                 <button
                   type="submit"
                   disabled={loading}
@@ -167,7 +179,7 @@ export default function LoginPage() {
               <p className="text-center text-muted-dark text-sm mt-3">
                 {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
                 <button
-                  onClick={() => setIsSignUp(!isSignUp)}
+                  onClick={() => { setIsSignUp(!isSignUp); setError(""); setSuccess(""); }}
                   className="text-accent-teal hover:underline"
                 >
                   {isSignUp ? "Sign In" : "Sign Up"}
