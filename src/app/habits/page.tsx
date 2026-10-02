@@ -35,6 +35,10 @@ export default function HabitsPage() {
 
   const today = getToday();
 
+  const visibleHabits = habits.filter(
+    (h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))
+  );
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/");
@@ -162,6 +166,43 @@ export default function HabitsPage() {
           </button>
         </div>
 
+        {/* Today's Commitments */}
+        <div className="card p-5 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-white tracking-tight">TODAY&apos;S COMMITMENTS</h2>
+            <span className="text-[10px] text-muted-dark font-mono tracking-widest uppercase">
+              {logs.filter((l) => l.date === today && l.completed).length} / {visibleHabits.length} DONE
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {visibleHabits.map((habit) => {
+              const log = logs.find((l) => l.habit_id === habit.id && l.date === today);
+              const completed = log?.completed || false;
+              const points = HABIT_POINTS[habit.name] || 10;
+              return (
+                <motion.button
+                  key={habit.id}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => toggleHabit(habit.id, today)}
+                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left group ${
+                    completed
+                      ? "border-accent-teal/30 bg-accent-teal/5"
+                      : "border-surface-border hover:border-accent-orange/40"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`habit-checkbox ${completed ? "checked" : ""}`} />
+                    <span className={`text-base ${completed ? "text-white" : "text-muted group-hover:text-foreground"}`}>
+                      {habit.name}
+                    </span>
+                  </div>
+                  <span className={`text-xs font-mono uppercase tracking-wider transition-colors ${completed ? "text-accent-orange" : "text-muted-dark"}`}>+{points}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Month Tabs */}
         <div className="flex gap-2 mb-4">
           {MONTHS.map((month, index) => (
@@ -194,7 +235,7 @@ export default function HabitsPage() {
             </div>
 
             {/* Habit Rows */}
-            {habits.filter((h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))).map((habit) => (
+            {visibleHabits.map((habit) => (
               <div key={habit.id} className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-1">
                 <div className="text-sm text-muted font-medium truncate pr-2 flex items-center justify-between">
                   <span>{habit.name}</span>
