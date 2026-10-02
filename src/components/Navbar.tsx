@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "./AuthProvider";
-import { signOut } from "@/lib/supabase";
 import { AnimatedTopDock } from "@/shaders/animated-top-dock/AnimatedTopDock";
 
 const NAV_ITEMS = [
@@ -19,11 +18,6 @@ export default function Navbar() {
   const { profile, user } = useAuth();
   const pathname = usePathname();
 
-  const handleSignOut = async () => {
-    await signOut();
-    window.location.href = "/";
-  };
-
   return (
     <>
       {/* Top dock — variants on sm+ */}
@@ -37,15 +31,6 @@ export default function Navbar() {
           heightGrowth={16}
           drop={3.5}
         />
-        <button
-          onClick={handleSignOut}
-          className="fixed top-4 right-4 z-50 text-muted hover:text-white transition-colors"
-          aria-label="Sign out"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-        </button>
         {(profile?.full_name || user?.email) && (
           <div className="hidden sm:flex fixed top-4 left-4 z-50 items-center gap-2 px-3 py-1.5 rounded-md bg-surface-light">
             <div
@@ -79,13 +64,6 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <button
-            onClick={handleSignOut}
-            className="flex flex-col items-center justify-center gap-0.5 py-2 flex-1 text-[10px] font-mono uppercase tracking-wider text-muted transition-colors hover:text-white"
-          >
-            <span className="text-base leading-none">🚪</span>
-            Exit
-          </button>
         </div>
       </nav>
     </>

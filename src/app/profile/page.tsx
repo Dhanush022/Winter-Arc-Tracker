@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
+import { signOut } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -344,6 +345,22 @@ export default function ProfilePage() {
               <button onClick={saveProfile} disabled={saving} className="bg-accent-teal text-black font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-all">
                 {saving ? "Saving..." : "Save Profile"}
               </button>
+
+              <div className="border-t border-surface-border pt-6 mt-6">
+                <h3 className="text-sm font-bold text-white mb-2">Account</h3>
+                <p className="text-muted-dark text-xs mb-4 font-mono uppercase tracking-wider">
+                  Signed in as {user?.email}
+                </p>
+                <button
+                  onClick={async () => {
+                    await signOut();
+                    window.location.href = "/";
+                  }}
+                  className="px-6 py-2.5 rounded-lg border border-red-500/40 text-red-400 font-semibold hover:bg-red-500/10 transition-all"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         )}
