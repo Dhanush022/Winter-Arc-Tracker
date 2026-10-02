@@ -102,6 +102,8 @@ export default function DashboardPage() {
     };
 
     fetchData();
+    window.addEventListener("winter-data-changed", fetchData);
+    return () => window.removeEventListener("winter-data-changed", fetchData);
   }, [user, today]);
 
   const toggleHabit = async (habitId: string) => {
@@ -118,7 +120,7 @@ export default function DashboardPage() {
         setAllLogs((prev) =>
           prev.map((l) => (l.id === existing.id ? { ...l, completed: newCompleted } : l))
         );
-        router.refresh();
+        router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
       }
     } else {
       const { data, error } = await supabase
@@ -129,7 +131,7 @@ export default function DashboardPage() {
 
       if (data && !error) {
         setAllLogs((prev) => [...prev, data]);
-        router.refresh();
+        router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
       }
     }
   };
@@ -178,7 +180,7 @@ export default function DashboardPage() {
     }
 
     setCheckingIn(false);
-    router.refresh();
+    router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
   };
 
   const saveMacros = async () => {
@@ -215,7 +217,7 @@ export default function DashboardPage() {
       if (data && !error) setMacroLogs((prev) => [...prev, data]);
     }
     setSavingMacros(false);
-    router.refresh();
+    router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
   };
 
   if (authLoading || loading) {

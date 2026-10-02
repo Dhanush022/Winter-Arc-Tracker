@@ -73,6 +73,8 @@ export default function HabitsPage() {
     };
 
     fetchData();
+    window.addEventListener("winter-data-changed", fetchData);
+    return () => window.removeEventListener("winter-data-changed", fetchData);
   }, [user]);
 
   const toggleHabit = async (habitId: string, date: string) => {
@@ -88,7 +90,7 @@ export default function HabitsPage() {
       setLogs((prev) =>
         prev.map((l) => (l.id === existing.id ? { ...l, completed: newCompleted } : l))
       );
-      router.refresh();
+      router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
     } else {
       const { data } = await supabase
         .from("habit_logs")
@@ -98,7 +100,7 @@ export default function HabitsPage() {
 
       if (data) {
         setLogs((prev) => [...prev, data]);
-        router.refresh();
+        router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
       }
     }
   };

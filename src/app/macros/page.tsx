@@ -49,6 +49,8 @@ export default function MacrosPage() {
     };
 
     fetchData();
+    window.addEventListener("winter-data-changed", fetchData);
+    return () => window.removeEventListener("winter-data-changed", fetchData);
   }, [user]);
 
   useEffect(() => {
@@ -107,7 +109,7 @@ export default function MacrosPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
-    router.refresh();
+    router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
   };
 
   const currentMacros = macroLogs.find((m) => m.date === selectedDate);

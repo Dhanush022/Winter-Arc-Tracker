@@ -45,6 +45,8 @@ export default function SleepPage() {
     };
 
     fetchData();
+    window.addEventListener("winter-data-changed", fetchData);
+    return () => window.removeEventListener("winter-data-changed", fetchData);
   }, [user]);
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export default function SleepPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
-    router.refresh();
+    router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
   };
 
   const avgSleep = sleepLogs.length > 0
