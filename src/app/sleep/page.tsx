@@ -32,7 +32,6 @@ export default function SleepPage() {
     if (!user) return;
 
     const fetchData = async () => {
-      setLoading(true);
       const { data } = await supabase
         .from("sleep_logs")
         .select("*")

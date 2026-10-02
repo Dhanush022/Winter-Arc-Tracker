@@ -44,8 +44,6 @@ export default function ProfilePage() {
     if (!user) return;
 
     const fetchData = async () => {
-      setLoading(true);
-
       if (profile) {
         setFullName(profile.full_name);
         setAvatarColor(profile.avatar_color);

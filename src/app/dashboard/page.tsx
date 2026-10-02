@@ -69,8 +69,6 @@ export default function DashboardPage() {
     if (!user) return;
 
     const fetchData = async () => {
-      setLoading(true);
-
       const [habitsRes, logsRes, sleepRes, freezesRes, macrosRes] = await Promise.all([
         supabase.from("habits").select("*").eq("user_id", user.id).order("order"),
         supabase.from("habit_logs").select("*").eq("user_id", user.id),

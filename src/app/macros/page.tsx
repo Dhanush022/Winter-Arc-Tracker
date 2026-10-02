@@ -36,7 +36,6 @@ export default function MacrosPage() {
     if (!user) return;
 
     const fetchData = async () => {
-      setLoading(true);
       const { data } = await supabase
         .from("macro_logs")
         .select("*")
