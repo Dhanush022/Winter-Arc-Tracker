@@ -361,25 +361,41 @@ export default function DashboardPage() {
                 const points = HABIT_POINTS[habit.name] || 10;
 
                 return (
-                  <button
+                  <motion.button
                     key={habit.id}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => toggleHabit(habit.id)}
-                    className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${
+                    className={`flex items-center justify-between p-3.5 rounded-xl border transition-all text-left group ${
                       completed
                         ? "border-accent-teal/30 bg-accent-teal/5"
-                        : "border-surface-border hover:border-surface-border/80"
+                        : "border-surface-border bg-surface-light/50 hover:border-accent-orange/40 hover:bg-surface-light"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`habit-checkbox ${completed ? "checked" : ""}`} />
-                      <span className={`text-base ${completed ? "text-white" : "text-muted"}`}>
+                      <motion.div
+                        initial={false}
+                        animate={completed ? { scale: [1, 1.35, 1] } : { scale: 1 }}
+                        transition={{ duration: 0.25 }}
+                        className={`habit-checkbox ${completed ? "checked" : ""}`}
+                      />
+                      <span className={`text-base ${completed ? "text-white" : "text-muted group-hover:text-foreground"}`}>
                         {habit.name}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-dark font-mono uppercase tracking-wider">+{points}</span>
-                  </button>
+                    <span className={`text-xs font-mono uppercase tracking-wider transition-colors ${completed ? "text-accent-orange" : "text-muted-dark"}`}>+{points}</span>
+                  </motion.button>
                 );
               })}
+            </div>
+
+            {/* Card footer status */}
+            <div className="mt-4 pt-4 border-t border-surface-border flex items-center justify-between">
+              <span className="text-[10px] text-muted-dark font-mono tracking-widest uppercase">
+                {completedToday.length} / {visibleHabits.length} DONE TODAY
+              </span>
+              <span className="text-[10px] text-accent-orange font-mono tracking-widest uppercase">
+                {todayScore}/{MAX_DAILY_SCORE} PTS AVAILABLE
+              </span>
             </div>
           </div>
 
