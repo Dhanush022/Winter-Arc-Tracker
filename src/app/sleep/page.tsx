@@ -89,12 +89,12 @@ export default function SleepPage() {
   }));
 
   const sleepDistribution = [
-    { label: "10+ hrs", count: sleepLogs.filter((s) => s.hours >= 10).length, color: "bg-orange-300" },
-    { label: "9-10", count: sleepLogs.filter((s) => s.hours >= 9 && s.hours < 10).length, color: "bg-orange-400" },
-    { label: "8-9", count: sleepLogs.filter((s) => s.hours >= 8 && s.hours < 9).length, color: "bg-orange-500" },
-    { label: "7-8", count: sleepLogs.filter((s) => s.hours >= 7 && s.hours < 8).length, color: "bg-orange-600" },
-    { label: "6-7", count: sleepLogs.filter((s) => s.hours >= 6 && s.hours < 7).length, color: "bg-orange-700" },
-    { label: "<6 hrs", count: sleepLogs.filter((s) => s.hours < 6).length, color: "bg-neutral-600" },
+    { label: "10+ hrs", count: sleepLogs.filter((s) => s.hours >= 10).length, color: "#fdba74" },
+    { label: "9-10", count: sleepLogs.filter((s) => s.hours >= 9 && s.hours < 10).length, color: "#fb923c" },
+    { label: "8-9", count: sleepLogs.filter((s) => s.hours >= 8 && s.hours < 9).length, color: "#f97316" },
+    { label: "7-8", count: sleepLogs.filter((s) => s.hours >= 7 && s.hours < 8).length, color: "#ea580c" },
+    { label: "6-7", count: sleepLogs.filter((s) => s.hours >= 6 && s.hours < 7).length, color: "#c2410c" },
+    { label: "<6 hrs", count: sleepLogs.filter((s) => s.hours < 6).length, color: "#525252" },
   ];
 
   if (authLoading || loading) {
@@ -195,8 +195,8 @@ export default function SleepPage() {
                     <span className="text-[10px] text-muted-dark font-mono w-12">{item.label}</span>
                     <div className="flex-1 h-2.5 bg-surface-light rounded-full overflow-hidden">
                       <div
-                        className={cn("h-full rounded-full", item.color)}
-                        style={{ width: `${sleepLogs.length > 0 ? (item.count / sleepLogs.length) * 100 : 0}%` }}
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${sleepLogs.length > 0 ? (item.count / sleepLogs.length) * 100 : 0}%`, backgroundColor: item.color }}
                       />
                     </div>
                     <span className="text-[10px] text-muted-dark font-mono w-6">{item.count}</span>
