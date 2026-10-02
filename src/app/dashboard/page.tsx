@@ -9,8 +9,7 @@ import { GalleryHeading } from "@/shaders/neuform-isolated/NeuformIsolatedEffect
 import "@/shaders/threeui.css";
 import { useRouter } from "next/navigation";
 import { getToday, getDayNumber, calculateStreak, cn } from "@/lib/utils";
-import { formatDate, getDateFromDay, getMonthFromDay } from "@/lib/utils";
-import { MONTHS, MAX_FREEZES } from "@/lib/types";
+import { MAX_FREEZES } from "@/lib/types";
 import { motion } from "framer-motion";
 import type { Habit, HabitLog, SleepLog, StreakFreeze, MacroLog } from "@/lib/types";
 
@@ -38,7 +37,6 @@ export default function DashboardPage() {
   const [freezes, setFreezes] = useState<StreakFreeze[]>([]);
   const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [activeMonth, setActiveMonth] = useState(getMonthFromDay(getDayNumber(getToday())));
   const [showFreezeModal, setShowFreezeModal] = useState(false);
   const [todayWorkout, setTodayWorkout] = useState("");
 
@@ -255,18 +253,7 @@ export default function DashboardPage() {
 
   const freezesLeft = MAX_FREEZES - freezes.length;
 
-  const getMonthDays = (monthIndex: number) => {
-    const days = [];
-    const startDay = MONTHS[monthIndex].startDay;
-    for (let i = 0; i < MONTHS[monthIndex].days; i++) {
-      days.push(startDay + i);
-    }
-    return days;
-  };
 
-  const isCompleted = (habitId: string, date: string) => {
-    return allLogs.find((l) => l.habit_id === habitId && l.date === date)?.completed || false;
-  };
 
   const macroTargets = profile?.macro_targets || { protein: 150, carbs: 250, fat: 70, calories: 2500 };
 

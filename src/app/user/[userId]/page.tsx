@@ -102,7 +102,7 @@ export default function UserSummaryPage() {
       <Navbar />
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
-          <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// FRIEND PROFILE</div>
+          <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">{"// FRIEND PROFILE"}</div>
           <div className="flex items-center gap-4">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl"

@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
-import { getToday, getSleepColor, cn } from "@/lib/utils";
+import { getToday, getSleepColor } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Cell } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import type { SleepLog } from "@/lib/types";
@@ -116,7 +116,7 @@ export default function SleepPage() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 flex items-end justify-between">
           <div>
-            <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// NIGHTLY REST</div>
+            <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">{"// NIGHTLY REST"}</div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-white uppercase">Sleep<span className="text-accent-orange">.</span></h1>
           </div>
           <div className="hidden md:block text-right font-mono text-[10px] text-muted-dark font-mono tracking-widest font-mono">
