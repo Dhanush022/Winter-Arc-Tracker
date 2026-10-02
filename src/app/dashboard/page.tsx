@@ -296,15 +296,15 @@ export default function DashboardPage() {
             <div className="flex gap-8 mt-4 justify-center">
               <div>
                 <div className="text-2xl font-bold text-white">{dayNumber}</div>
-                <div className="text-[10px] text-muted-dark tracking-widest">DAY OF ARC</div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">DAY OF ARC</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-white">{streak}d</div>
-                <div className="text-[10px] text-muted-dark tracking-widest">STREAK</div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">STREAK</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-white">{todayScore}</div>
-                <div className="text-[10px] text-muted-dark tracking-widest">TODAY&apos;S PTS</div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">TODAY&apos;S PTS</div>
               </div>
             </div>
           </div>
@@ -325,14 +325,14 @@ export default function DashboardPage() {
               <span className="text-accent-orange">🔥</span>
               <div>
                 <div className="text-white font-bold">{streak}</div>
-                <div className="text-[10px] text-muted-dark tracking-widest">DAY STREAK</div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">DAY STREAK</div>
               </div>
             </div>
             <div className="card px-4 py-2 flex items-center gap-2">
               <span className="text-accent-teal">❄</span>
               <div>
                 <div className="text-white font-bold">{freezesLeft}</div>
-                <div className="text-[10px] text-muted-dark tracking-widest">FREEZES</div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">FREEZES</div>
               </div>
             </div>
           </div>
@@ -374,7 +374,7 @@ export default function DashboardPage() {
                         {habit.name}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-dark">+{points}</span>
+                    <span className="text-xs text-muted-dark font-mono uppercase tracking-wider">+{points}</span>
                   </button>
                 );
               })}
@@ -385,7 +385,7 @@ export default function DashboardPage() {
           <div className="space-y-4">
             {/* Today's Score */}
             <div className="card p-5">
-              <div className="text-[10px] text-muted-dark tracking-widest mb-2">TODAY&apos;S SCORE</div>
+              <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono mb-2">TODAY&apos;S SCORE</div>
               <div className="flex items-center justify-between mb-3">
                 <div className="text-3xl font-black text-white">
                   {todayScore}<span className="text-lg text-muted-dark">/{MAX_DAILY_SCORE}</span>
@@ -397,7 +397,7 @@ export default function DashboardPage() {
 
             {/* Last 7 Days */}
             <div className="card p-5">
-              <div className="text-[10px] text-muted-dark tracking-widest mb-4">LAST 7 DAYS</div>
+              <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono mb-4">LAST 7 DAYS</div>
               <div className="flex items-end justify-between h-24 gap-1">
                 {last7Days.map((day, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1">
@@ -407,7 +407,7 @@ export default function DashboardPage() {
                         style={{ height: `${visibleHabits.length > 0 ? (day.completed / visibleHabits.length) * 100 : 0}%`, marginTop: `${100 - (visibleHabits.length > 0 ? (day.completed / visibleHabits.length) * 100 : 0)}%` }}
                       />
                     </div>
-                    <span className="text-[10px] text-muted-dark">{day.day}</span>
+                    <span className="text-[10px] text-muted-dark font-mono">{day.day}</span>
                   </div>
                 ))}
               </div>
@@ -415,7 +415,7 @@ export default function DashboardPage() {
 
             {/* Streak Freeze */}
             <div className="card p-5">
-              <div className="text-[10px] text-muted-dark tracking-widest mb-2">STREAK FREEZE</div>
+              <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono mb-2">STREAK FREEZE</div>
               <p className="text-muted text-xs mb-3">Protect your streak for one day. Limited uses.</p>
               <button
                 onClick={() => setShowFreezeModal(true)}
@@ -459,9 +459,9 @@ export default function DashboardPage() {
             <div className="min-w-[800px]">
               {/* Header Row */}
               <div className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-2">
-                <div className="text-[10px] text-muted-dark tracking-widest font-medium">HABIT</div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono font-medium">HABIT</div>
                 {getMonthDays(activeMonth).map((day) => (
-                  <div key={day} className="text-[10px] text-muted-dark text-center">
+                  <div key={day} className="text-[10px] text-muted-dark font-mono text-center">
                     {day}
                   </div>
                 ))}
@@ -472,7 +472,7 @@ export default function DashboardPage() {
                 <div key={habit.id} className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-1">
                   <div className="text-base text-muted font-medium truncate pr-2 flex items-center justify-between">
                     <span>{habit.name}</span>
-                    <span className="text-[10px] text-muted-dark">+{HABIT_POINTS[habit.name] || 10}</span>
+                    <span className="text-[10px] text-muted-dark font-mono">+{HABIT_POINTS[habit.name] || 10}</span>
                   </div>
                   {getMonthDays(activeMonth).map((day) => {
                     const date = formatDate(getDateFromDay(day));
@@ -510,7 +510,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-bold text-white tracking-tight mb-4">SLEEP</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">DATE</label>
+              <label className="block text-[10px] text-muted-dark font-mono mb-1 tracking-widest">DATE</label>
               <input
                 type="date"
                 value={today}
@@ -519,7 +519,7 @@ export default function DashboardPage() {
               />
             </div>
             <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">HOURS SLEPT</label>
+              <label className="block text-[10px] text-muted-dark font-mono mb-1 tracking-widest">HOURS SLEPT</label>
               <input
                 type="number" min="0"
                 step="0.5"
@@ -551,7 +551,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-bold text-white tracking-tight mb-4">MACROS</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">PROTEIN (g)</label>
+              <label className="block text-[10px] text-muted-dark font-mono mb-1 tracking-widest">PROTEIN (g)</label>
               <input
                 type="number" min="0"
                 placeholder={macroTargets.protein.toString()}
@@ -561,7 +561,7 @@ export default function DashboardPage() {
               />
             </div>
             <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">CARBS (g)</label>
+              <label className="block text-[10px] text-muted-dark font-mono mb-1 tracking-widest">CARBS (g)</label>
               <input
                 type="number" min="0"
                 placeholder={macroTargets.carbs.toString()}
@@ -571,7 +571,7 @@ export default function DashboardPage() {
               />
             </div>
             <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">FAT (g)</label>
+              <label className="block text-[10px] text-muted-dark font-mono mb-1 tracking-widest">FAT (g)</label>
               <input
                 type="number" min="0"
                 placeholder={macroTargets.fat.toString()}
@@ -581,7 +581,7 @@ export default function DashboardPage() {
               />
             </div>
             <div>
-              <label className="block text-[10px] text-muted-dark mb-1 tracking-widest">CALORIES</label>
+              <label className="block text-[10px] text-muted-dark font-mono mb-1 tracking-widest">CALORIES</label>
               <input
                 type="number" min="0"
                 placeholder={macroTargets.calories.toString()}

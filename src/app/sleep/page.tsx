@@ -117,7 +117,7 @@ export default function SleepPage() {
             <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// NIGHTLY REST</div>
             <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">Sleep<span className="text-accent-orange">.</span></h1>
           </div>
-          <div className="hidden md:block text-right font-mono text-[10px] text-muted-dark tracking-widest">
+          <div className="hidden md:block text-right font-mono text-[10px] text-muted-dark font-mono tracking-widest font-mono">
             {sleepLogs.length} NIGHTS LOGGED<br />AVG {avgSleep.toFixed(1)}H
           </div>
         </div>
@@ -192,14 +192,14 @@ export default function SleepPage() {
               <div className="space-y-2">
                 {sleepDistribution.map((item) => (
                   <div key={item.label} className="flex items-center gap-2">
-                    <span className="text-[10px] text-muted-dark w-12">{item.label}</span>
+                    <span className="text-[10px] text-muted-dark font-mono w-12">{item.label}</span>
                     <div className="flex-1 h-1.5 bg-surface-light rounded-full overflow-hidden">
                       <div
                         className={cn("h-full rounded-full", item.color)}
                         style={{ width: `${sleepLogs.length > 0 ? (item.count / sleepLogs.length) * 100 : 0}%` }}
                       />
                     </div>
-                    <span className="text-[10px] text-muted-dark w-6">{item.count}</span>
+                    <span className="text-[10px] text-muted-dark font-mono w-6">{item.count}</span>
                   </div>
                 ))}
               </div>

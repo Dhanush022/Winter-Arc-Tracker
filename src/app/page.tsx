@@ -62,7 +62,7 @@ export default function LoginPage() {
           </div>
           <div>
             <span className="font-bold text-white tracking-tight">WINTER ARC</span>
-            <span className="text-[10px] text-muted-dark ml-2 tracking-widest">EARN THE SPRING</span>
+            <span className="text-[10px] text-muted-dark font-mono ml-2 tracking-widest">EARN THE SPRING</span>
           </div>
         </div>
       </nav>
@@ -89,15 +89,15 @@ export default function LoginPage() {
             <div className="flex gap-8 mb-8">
               <div>
                 <div className="text-2xl font-bold text-white">1</div>
-                <div className="text-[10px] text-muted-dark tracking-widest">MEMBERS</div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">MEMBERS</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-white">0d</div>
-                <div className="text-[10px] text-muted-dark tracking-widest">TOP STREAK</div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">TOP STREAK</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-white">0</div>
-                <div className="text-[10px] text-muted-dark tracking-widest">POINTS EARNED</div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">POINTS EARNED</div>
               </div>
             </div>
 

@@ -224,7 +224,7 @@ export default function ProfilePage() {
             <div className="space-y-6">
               {/* Avatar */}
               <div>
-                <label className="block text-xs text-muted-dark mb-2 tracking-widest">AVATAR COLOR</label>
+                <label className="block text-xs text-muted-dark font-mono uppercase tracking-wider mb-2 tracking-widest">AVATAR COLOR</label>
                 <div className="flex gap-2 flex-wrap">
                   {AVATAR_COLORS.map((color) => (
                     <button
@@ -242,7 +242,7 @@ export default function ProfilePage() {
 
               {/* Name */}
               <div>
-                <label className="block text-xs text-muted-dark mb-1 tracking-widest">FULL NAME</label>
+                <label className="block text-xs text-muted-dark font-mono uppercase tracking-wider mb-1 tracking-widest">FULL NAME</label>
                 <input
                   type="text"
                   value={fullName}
@@ -253,7 +253,7 @@ export default function ProfilePage() {
 
               {/* Goal Mode */}
               <div>
-                <label className="block text-xs text-muted-dark mb-2 tracking-widest">GOAL MODE</label>
+                <label className="block text-xs text-muted-dark font-mono uppercase tracking-wider mb-2 tracking-widest">GOAL MODE</label>
                 <div className="flex gap-2">
                   {(["bulk", "cut", "maintain"] as const).map((mode) => (
                     <button
@@ -274,10 +274,10 @@ export default function ProfilePage() {
 
               {/* Macro Targets */}
               <div>
-                <label className="block text-xs text-muted-dark mb-2 tracking-widest">DAILY MACRO TARGETS</label>
+                <label className="block text-xs text-muted-dark font-mono uppercase tracking-wider mb-2 tracking-widest">DAILY MACRO TARGETS</label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-[10px] text-muted-dark mb-1">Protein (g)</label>
+                    <label className="block text-[10px] text-muted-dark font-mono mb-1">Protein (g)</label>
                     <input
                       type="number" min="0"
                       value={protein}
@@ -286,7 +286,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] text-muted-dark mb-1">Carbs (g)</label>
+                    <label className="block text-[10px] text-muted-dark font-mono mb-1">Carbs (g)</label>
                     <input
                       type="number" min="0"
                       value={carbs}
@@ -295,7 +295,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] text-muted-dark mb-1">Fat (g)</label>
+                    <label className="block text-[10px] text-muted-dark font-mono mb-1">Fat (g)</label>
                     <input
                       type="number" min="0"
                       value={fat}
@@ -304,7 +304,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] text-muted-dark mb-1">Calories</label>
+                    <label className="block text-[10px] text-muted-dark font-mono mb-1">Calories</label>
                     <input
                       type="number" min="0"
                       value={calories}
@@ -317,11 +317,11 @@ export default function ProfilePage() {
 
             {/* Custom Habits */}
             <div>
-              <label className="block text-xs text-muted-dark mb-2 tracking-widest">CUSTOM HABITS</label>
+              <label className="block text-xs text-muted-dark font-mono uppercase tracking-wider mb-2 tracking-widest">CUSTOM HABITS</label>
               <p className="text-muted-dark text-[11px] mb-2">Name your two custom habits to show them on your dashboard.</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] text-muted-dark mb-1">Custom Habit 1</label>
+                  <label className="block text-[10px] text-muted-dark font-mono mb-1">Custom Habit 1</label>
                   <input
                     type="text"
                     value={customHabit1}
@@ -331,7 +331,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-muted-dark mb-1">Custom Habit 2</label>
+                  <label className="block text-[10px] text-muted-dark font-mono mb-1">Custom Habit 2</label>
                   <input
                     type="text"
                     value={customHabit2}
@@ -360,7 +360,7 @@ export default function ProfilePage() {
                   <h3 className="text-sm font-bold text-white mb-3">WEEK {week}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-[10px] text-muted-dark mb-1">Weight (kg)</label>
+                      <label className="block text-[10px] text-muted-dark font-mono mb-1">Weight (kg)</label>
                       <input
                         type="number" min="0"
                         step="0.1"
@@ -371,7 +371,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] text-muted-dark mb-1">Wins</label>
+                      <label className="block text-[10px] text-muted-dark font-mono mb-1">Wins</label>
                       <textarea
                         defaultValue={checkin?.wins || ""}
                         onBlur={(e) => saveCheckin(week, "wins", e.target.value)}
@@ -381,7 +381,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] text-muted-dark mb-1">Focus for Next Week</label>
+                      <label className="block text-[10px] text-muted-dark font-mono mb-1">Focus for Next Week</label>
                       <textarea
                         defaultValue={checkin?.focus || ""}
                         onBlur={(e) => saveCheckin(week, "focus", e.target.value)}
@@ -407,7 +407,7 @@ export default function ProfilePage() {
                   <h3 className="text-sm font-bold text-white mb-3 uppercase">{month}</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-[10px] text-muted-dark mb-1">Biggest Win</label>
+                      <label className="block text-[10px] text-muted-dark font-mono mb-1">Biggest Win</label>
                       <textarea
                         defaultValue={reflection?.win || ""}
                         onBlur={(e) => saveReflection(month, "win", e.target.value)}
@@ -417,7 +417,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] text-muted-dark mb-1">Biggest Lesson</label>
+                      <label className="block text-[10px] text-muted-dark font-mono mb-1">Biggest Lesson</label>
                       <textarea
                         defaultValue={reflection?.lesson || ""}
                         onBlur={(e) => saveReflection(month, "lesson", e.target.value)}
@@ -427,7 +427,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] text-muted-dark mb-1">What to Improve</label>
+                      <label className="block text-[10px] text-muted-dark font-mono mb-1">What to Improve</label>
                       <textarea
                         defaultValue={reflection?.improve || ""}
                         onBlur={(e) => saveReflection(month, "improve", e.target.value)}
@@ -437,7 +437,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] text-muted-dark mb-1">Next Month&apos;s Goal</label>
+                      <label className="block text-[10px] text-muted-dark font-mono mb-1">Next Month&apos;s Goal</label>
                       <textarea
                         defaultValue={reflection?.next_goal || ""}
                         onBlur={(e) => saveReflection(month, "next_goal", e.target.value)}

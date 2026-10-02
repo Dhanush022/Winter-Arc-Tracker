@@ -181,9 +181,9 @@ export default function HabitsPage() {
           <div className="min-w-[800px]">
             {/* Header Row */}
             <div className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-2">
-              <div className="text-[10px] text-muted-dark tracking-widest font-medium">HABIT</div>
+              <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono font-medium">HABIT</div>
               {getMonthDays(activeMonth).map((day) => (
-                <div key={day} className="text-[10px] text-muted-dark text-center">
+                <div key={day} className="text-[10px] text-muted-dark font-mono text-center">
                   {day}
                 </div>
               ))}
@@ -194,7 +194,7 @@ export default function HabitsPage() {
               <div key={habit.id} className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-1">
                 <div className="text-sm text-muted font-medium truncate pr-2 flex items-center justify-between">
                   <span>{habit.name}</span>
-                  <span className="text-[10px] text-muted-dark">+{HABIT_POINTS[habit.name] || 10}</span>
+                  <span className="text-[10px] text-muted-dark font-mono">+{HABIT_POINTS[habit.name] || 10}</span>
                 </div>
                 {getMonthDays(activeMonth).map((day) => {
                   const date = formatDate(getDateFromDay(day));
