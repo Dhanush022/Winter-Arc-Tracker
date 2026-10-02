@@ -77,6 +77,7 @@ export default function SleepPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
+    router.refresh();
   };
 
   const avgSleep = sleepLogs.length > 0

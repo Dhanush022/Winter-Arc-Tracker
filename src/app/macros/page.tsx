@@ -107,6 +107,7 @@ export default function MacrosPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
+    router.refresh();
   };
 
   const currentMacros = macroLogs.find((m) => m.date === selectedDate);

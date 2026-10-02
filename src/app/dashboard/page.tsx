@@ -182,6 +182,7 @@ export default function DashboardPage() {
     }
 
     setCheckingIn(false);
+    router.refresh();
   };
 
   const saveMacros = async () => {
@@ -218,6 +219,7 @@ export default function DashboardPage() {
       if (data && !error) setMacroLogs((prev) => [...prev, data]);
     }
     setSavingMacros(false);
+    router.refresh();
   };
 
   if (authLoading || loading) {
