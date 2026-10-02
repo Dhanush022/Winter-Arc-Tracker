@@ -93,7 +93,7 @@ export default function SleepPage() {
   const sleepDistribution = [
     { label: "10+ hrs", count: sleepLogs.filter((s) => s.hours >= 10).length, color: "#fdba74" },
     { label: "9-10", count: sleepLogs.filter((s) => s.hours >= 9 && s.hours < 10).length, color: "#fb923c" },
-    { label: "8-9", count: sleepLogs.filter((s) => s.hours >= 8 && s.hours < 9).length, color: "#f97316" },
+    { label: "8-9", count: sleepLogs.filter((s) => s.hours >= 8 && s.hours < 9).length, color: "#ea580c" },
     { label: "7-8", count: sleepLogs.filter((s) => s.hours >= 7 && s.hours < 8).length, color: "#ea580c" },
     { label: "6-7", count: sleepLogs.filter((s) => s.hours >= 6 && s.hours < 7).length, color: "#c2410c" },
     { label: "<6 hrs", count: sleepLogs.filter((s) => s.hours < 6).length, color: "#525252" },
@@ -225,9 +225,9 @@ export default function SleepPage() {
                     <Line
                       type="monotone"
                       dataKey="hours"
-                      stroke="#f97316"
+                      stroke="#ea580c"
                       strokeWidth={2}
-                      dot={{ fill: "#f97316", r: 3 }}
+                      dot={{ fill: "#ea580c", r: 3 }}
                       name="Hours"
                     />
                   </LineChart>

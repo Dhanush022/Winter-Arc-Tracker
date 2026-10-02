@@ -116,7 +116,7 @@ export default function MacrosPage() {
 
   const pieData = currentMacros
     ? [
-        { name: "Protein", value: currentMacros.protein * 4, color: "#f97316" },
+        { name: "Protein", value: currentMacros.protein * 4, color: "#ea580c" },
         { name: "Carbs", value: currentMacros.carbs * 4, color: "#6b7280" },
         { name: "Fat", value: currentMacros.fat * 9, color: "#fafafa" },
       ]
@@ -332,7 +332,7 @@ export default function MacrosPage() {
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a" }}
                       />
                       <Legend />
-                      <Bar dataKey="protein" fill="#f97316" name="Protein" />
+                      <Bar dataKey="protein" fill="#ea580c" name="Protein" />
                       <Bar dataKey="carbs" fill="#6b7280" name="Carbs" />
                       <Bar dataKey="fat" fill="#fafafa" name="Fat" />
                     </BarChart>

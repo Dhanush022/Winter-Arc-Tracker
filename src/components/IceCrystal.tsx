@@ -45,12 +45,12 @@ function InnerCrystal() {
     <mesh ref={mesh}>
       <octahedronGeometry args={[0.8, 0]} />
       <meshStandardMaterial
-        color="#f97316"
+        color="#ea580c"
         transparent
         opacity={0.5}
         roughness={0}
         metalness={1}
-        emissive="#f97316"
+        emissive="#ea580c"
         emissiveIntensity={0.3}
       />
     </mesh>
@@ -63,7 +63,7 @@ export default function IceCrystal() {
       <Canvas camera={{ position: [0, 0, 4], fov: 45 }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[5, 5, 5]} intensity={1} color="#9ca3af" />
-        <pointLight position={[-5, -5, 5]} intensity={0.5} color="#f97316" />
+        <pointLight position={[-5, -5, 5]} intensity={0.5} color="#ea580c" />
         <Crystal />
         <InnerCrystal />
       </Canvas>

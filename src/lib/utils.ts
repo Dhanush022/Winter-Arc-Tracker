@@ -103,7 +103,7 @@ export function getStreakEmoji(streak: number): string {
 
 export function getSleepColor(hours: number): string {
   if (hours >= 9) return "#fb923c";
-  if (hours >= 8) return "#f97316";
+  if (hours >= 8) return "#ea580c";
   if (hours >= 7) return "#ea580c";
   if (hours >= 6) return "#c2410c";
   return "#525252";
