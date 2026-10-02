@@ -45,6 +45,8 @@ export default function DashboardPage() {
   // Sleep field
   const [sleepHours, setSleepHours] = useState("");
   const [checkingIn, setCheckingIn] = useState(false);
+  const [sleepSaved, setSleepSaved] = useState(false);
+  const [sleepError, setSleepError] = useState("");
 
   // Macro fields
   const [macroProtein, setMacroProtein] = useState("");
@@ -169,16 +171,32 @@ export default function DashboardPage() {
 
   const handleCheckin = async () => {
     setCheckingIn(true);
+    setSleepError("");
 
     if (sleepHours) {
+      const hours = Math.max(0, Number(sleepHours) || 0);
       const existing = sleepLogs.find((s) => s.date === today);
       if (existing) {
-        await supabase.from("sleep_logs").update({ hours: Math.max(0, Number(sleepHours)) }).eq("id", existing.id);
-        setSleepLogs((prev) => prev.map((s) => s.id === existing.id ? { ...s, hours: Math.max(0, Number(sleepHours)) } : s));
+        const { error } = await supabase.from("sleep_logs").update({ hours }).eq("id", existing.id);
+        if (error) {
+          setSleepError(error.message);
+        } else {
+          setSleepLogs((prev) => prev.map((s) => s.id === existing.id ? { ...s, hours } : s));
+          setSleepSaved(true);
+          setTimeout(() => setSleepSaved(false), 1800);
+        }
       } else {
-        const { data } = await supabase.from("sleep_logs").insert({ user_id: user!.id, date: today, hours: Math.max(0, Number(sleepHours)) }).select().single();
-        if (data) setSleepLogs((prev) => [data, ...prev]);
+        const { data, error } = await supabase.from("sleep_logs").insert({ user_id: user!.id, date: today, hours }).select().single();
+        if (error) {
+          setSleepError(error.message);
+        } else if (data) {
+          setSleepLogs((prev) => [data, ...prev]);
+          setSleepSaved(true);
+          setTimeout(() => setSleepSaved(false), 1800);
+        }
       }
+    } else {
+      setSleepError("Enter the number of hours first.");
     }
 
     setCheckingIn(false);
@@ -440,7 +458,7 @@ export default function DashboardPage() {
                   <div key={i} className="flex-1 flex flex-col items-center gap-1">
                     <div className="w-full bg-surface-light rounded-sm overflow-hidden" style={{ height: "60px" }}>
                       <div
-                        className="w-full bg-accent-teal/60 rounded-sm transition-all"
+                        className="w-full bg-neutral-500/60 rounded-sm transition-all"
                         style={{ height: `${visibleHabits.length > 0 ? (day.completed / visibleHabits.length) * 100 : 0}%`, marginTop: `${100 - (visibleHabits.length > 0 ? (day.completed / visibleHabits.length) * 100 : 0)}%` }}
                       />
                     </div>
@@ -541,7 +559,7 @@ export default function DashboardPage() {
                             : isFuture
                             ? "bg-surface-light/30 cursor-not-allowed"
                             : "bg-surface-light hover:bg-surface-light/80 border border-surface-border/50",
-                          isToday && "ring-1 ring-accent-teal/50"
+                          isToday && "ring-1 ring-white/60"
                         )}
                       >
                         {completed && <span className="text-accent-teal">✓</span>}
@@ -582,10 +600,16 @@ export default function DashboardPage() {
             <div className="flex items-end">
               <button
                 onClick={handleCheckin}
-                className="w-full bg-accent-teal text-black font-semibold px-4 py-2.5 rounded-lg hover:opacity-90 transition-all"
+                disabled={checkingIn}
+                className="w-full bg-accent-teal text-black font-semibold px-4 py-2.5 rounded-lg hover:opacity-90 transition-all disabled:opacity-60"
               >
-                Save Sleep
+                {checkingIn ? "Saving..." : "Save Sleep"}
               </button>
+              {(sleepSaved || sleepError) && (
+                <p className={`mt-2 text-xs font-mono uppercase tracking-wider ${sleepError ? "text-red-400" : "text-accent-orange"}`}>
+                  {sleepError ? `Error: ${sleepError}` : "✓ Saved to the log"}
+                </p>
+              )}
             </div>
           </div>
           {sleepLogs.length > 0 && (

@@ -215,7 +215,7 @@ export default function HabitsPage() {
                           : isFuture
                           ? "bg-surface-light/30 cursor-not-allowed"
                           : "bg-surface-light hover:bg-surface-light/80 border border-surface-border/50",
-                        isToday && "ring-1 ring-accent-teal/50"
+                        isToday && "ring-1 ring-white/60"
                       )}
                     >
                       {completed && (
