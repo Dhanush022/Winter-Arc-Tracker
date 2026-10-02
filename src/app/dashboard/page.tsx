@@ -258,12 +258,30 @@ export default function DashboardPage() {
   const macroTargets = profile?.macro_targets || { protein: 150, carbs: 250, fat: 70, calories: 2500 };
 
   return (
-    <div className="min-h-screen pt-16 pb-8 px-4">
+    <div className="min-h-screen pt-4 sm:pt-16 pb-24 sm:pb-8 px-4">
       <Navbar />
 
       <div className="max-w-7xl mx-auto">
+        {/* Profile card */}
+        <div className="card p-4 mb-4 flex items-center gap-4">
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg"
+            style={{ backgroundColor: profile?.avatar_color || "#ea580c" }}
+          >
+            {profile?.full_name?.charAt(0) || "W"}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] text-muted-dark font-mono tracking-widest uppercase">WELCOME BACK</div>
+            <div className="text-white font-bold truncate">{profile?.full_name || "Warrior"}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] text-muted-dark font-mono uppercase tracking-widest">Goal</div>
+            <div className="text-accent-orange font-semibold capitalize">{profile?.goal_mode || "maintain"}</div>
+          </div>
+        </div>
+
         {/* Hero Section */}
-        <div className="card p-5 sm:p-8 mb-6 grid-bg">
+        <div className="card p-3 sm:p-6 mb-6 grid-bg">
           <div className="flex flex-col items-center text-center">
             <div className="shader-frame w-full max-w-2xl h-[250px] md:h-[300px] rounded-xl overflow-hidden">
               <GalleryHeading

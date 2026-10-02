@@ -47,16 +47,18 @@ export default function Navbar() {
       </div>
 
       {/* Bottom tab bar — mobile only, same dark-glass pill design */}
-      <nav className="sm:hidden fixed bottom-0 inset-x-0 z-50 border-t border-surface-border bg-background/90 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
-        <div className="flex items-stretch justify-around">
+      <nav className="sm:hidden fixed inset-x-4 bottom-4 z-50 rounded-2xl border border-surface-border bg-[#0e0e0e]/85 backdrop-blur-xl shadow-[0_12px_34px_rgba(0,0,0,0.48),inset_0_1px_rgba(255,255,255,0.04)]">
+        <div className="flex items-stretch justify-around px-1.5 py-1.5 pb-[max(6px,env(safe-area-inset-bottom))]">
           {NAV_ITEMS.map((item) => {
             const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-0.5 py-2 flex-1 text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                  active ? "text-accent-orange" : "text-muted"
+                className={`flex flex-col items-center justify-center gap-0.5 px-2.5 py-1.5 rounded-xl flex-1 text-[9px] font-mono uppercase tracking-wider transition-all ${
+                  active
+                    ? "bg-[#1f1f1f] text-accent-orange"
+                    : "text-[#858580] hover:text-white"
                 }`}
               >
                 <span className="text-base leading-none">{item.icon}</span>

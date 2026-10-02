@@ -112,14 +112,14 @@ export default function LeaderboardList() {
           >
             {entry.full_name.charAt(0)}
           </div>
-          <div className="flex-1">
-            <div className="font-semibold text-white">{entry.full_name}</div>
-            <div className="text-xs text-muted capitalize">{entry.total_freezes > 0 ? `${entry.total_freezes} freezes used` : "No freezes used"}</div>
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-white truncate">{entry.full_name}</div>
+            <div className="text-xs text-muted capitalize truncate">{entry.total_freezes > 0 ? `${entry.total_freezes} freezes used` : "No freezes used"}</div>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 whitespace-nowrap">
               <span className="text-accent-orange">🔥</span>
-              <span className="text-white font-semibold">{entry.current_streak} days</span>
+              <span className="text-white font-semibold text-sm">{entry.current_streak}d</span>
             </div>
             <div className="text-right">
               <span className="text-white font-bold">{entry.arc_score}</span>
