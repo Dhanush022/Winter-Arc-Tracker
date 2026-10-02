@@ -88,6 +88,7 @@ export default function HabitsPage() {
       setLogs((prev) =>
         prev.map((l) => (l.id === existing.id ? { ...l, completed: newCompleted } : l))
       );
+      router.refresh();
     } else {
       const { data } = await supabase
         .from("habit_logs")
@@ -95,7 +96,10 @@ export default function HabitsPage() {
         .select()
         .single();
 
-      if (data) setLogs((prev) => [...prev, data]);
+      if (data) {
+        setLogs((prev) => [...prev, data]);
+        router.refresh();
+      }
     }
   };
 

@@ -118,6 +118,7 @@ export default function DashboardPage() {
         setAllLogs((prev) =>
           prev.map((l) => (l.id === existing.id ? { ...l, completed: newCompleted } : l))
         );
+        router.refresh();
       }
     } else {
       const { data, error } = await supabase
@@ -126,33 +127,10 @@ export default function DashboardPage() {
         .select()
         .single();
 
-      if (data && !error) setAllLogs((prev) => [...prev, data]);
-    }
-  };
-
-  const toggleHabitDate = async (habitId: string, date: string) => {
-    const existing = allLogs.find((l) => l.habit_id === habitId && l.date === date);
-
-    if (existing) {
-      const newCompleted = !existing.completed;
-      const { error } = await supabase
-        .from("habit_logs")
-        .update({ completed: newCompleted })
-        .eq("id", existing.id);
-
-      if (!error) {
-        setAllLogs((prev) =>
-          prev.map((l) => (l.id === existing.id ? { ...l, completed: newCompleted } : l))
-        );
+      if (data && !error) {
+        setAllLogs((prev) => [...prev, data]);
+        router.refresh();
       }
-    } else {
-      const { data, error } = await supabase
-        .from("habit_logs")
-        .insert({ user_id: user!.id, habit_id: habitId, date, completed: true })
-        .select()
-        .single();
-
-      if (data && !error) setAllLogs((prev) => [...prev, data]);
     }
   };
 
@@ -300,22 +278,22 @@ export default function DashboardPage() {
         {/* Hero Section */}
         <div className="card p-8 mb-6 grid-bg">
           <div className="flex flex-col items-center text-center">
-            <div className="shader-frame w-full max-w-3xl h-[360px] md:h-[440px] rounded-xl overflow-hidden">
+            <div className="shader-frame w-full max-w-2xl h-[250px] md:h-[300px] rounded-xl overflow-hidden">
               <GalleryHeading
                 variant="rising-diagonal"
                 mode="dark"
                 font="sans"
                 weight="400"
-                headlineSize={1.55}
+                headlineSize={1.25}
                 hue={0}
                 saturation={1.0}
                 brightness={1.0}
               />
             </div>
-            <p className="text-muted text-base md:text-lg mt-1 max-w-xl">
+            <p className="text-muted text-base md:text-lg mt-2 max-w-xl">
               Keep every promise you make to yourself. Build streaks, protect them with limited freezes, and climb with your crew.
             </p>
-            <div className="flex gap-8 mt-4 justify-center">
+            <div className="flex gap-8 mt-2 justify-center">
               <div>
                 <div className="text-2xl font-bold text-white">{dayNumber}</div>
                 <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">DAY OF ARC</div>
@@ -496,78 +474,6 @@ export default function DashboardPage() {
                   ▸ {todayWorkout} day — go earn it.
                 </motion.p>
               )}
-            </div>
-          </div>
-        </div>
-
-        {/* Habit Grid */}
-        <div className="card p-5 mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-white tracking-tight">HABIT GRID</h2>
-            <div className="flex gap-2">
-              {MONTHS.map((month, index) => (
-                <button
-                  key={month.name}
-                  onClick={() => setActiveMonth(index)}
-                  className={cn(
-                    "px-3 py-1 rounded text-xs font-medium transition-all",
-                    activeMonth === index
-                      ? "bg-accent-teal/10 text-accent-teal border border-accent-teal/30"
-                      : "text-muted border border-surface-border hover:text-white"
-                  )}
-                >
-                  {month.short}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <div className="min-w-[800px]">
-              {/* Header Row */}
-              <div className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-2">
-                <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono font-medium">HABIT</div>
-                {getMonthDays(activeMonth).map((day) => (
-                  <div key={day} className="text-[10px] text-muted-dark font-mono text-center">
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              {/* Habit Rows */}
-              {visibleHabits.map((habit) => (
-                <div key={habit.id} className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-1">
-                  <div className="text-base text-muted font-medium truncate pr-2 flex items-center justify-between">
-                    <span>{habit.name}</span>
-                    <span className="text-[10px] text-muted-dark font-mono">+{HABIT_POINTS[habit.name] || 10}</span>
-                  </div>
-                  {getMonthDays(activeMonth).map((day) => {
-                    const date = formatDate(getDateFromDay(day));
-                    const completed = isCompleted(habit.id, date);
-                    const isFuture = date > today;
-                    const isToday = date === today;
-
-                    return (
-                      <button
-                        key={day}
-                        onClick={() => !isFuture && toggleHabitDate(habit.id, date)}
-                        disabled={isFuture}
-                        className={cn(
-                          "w-full h-4 rounded transition-all text-[10px]",
-                          completed
-                            ? "bg-accent-teal/20 border border-accent-teal/40"
-                            : isFuture
-                            ? "bg-surface-light/30 cursor-not-allowed"
-                            : "bg-surface-light hover:bg-surface-light/80 border border-surface-border/50",
-                          isToday && "ring-1 ring-white/60"
-                        )}
-                      >
-                        {completed && <span className="text-accent-teal">✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
             </div>
           </div>
         </div>
