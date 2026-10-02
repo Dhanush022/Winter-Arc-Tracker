@@ -44,7 +44,10 @@ export default function MacrosPage() {
         .order("date", { ascending: false })
         .limit(90);
 
-      if (data) setMacroLogs(data);
+      if (data) {
+        setMacroLogs(data);
+        setCached("macros", data);
+      }
       setLoading(false);
     };
 

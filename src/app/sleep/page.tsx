@@ -40,7 +40,10 @@ export default function SleepPage() {
         .order("date", { ascending: false })
         .limit(90);
 
-      if (data) setSleepLogs(data);
+      if (data) {
+        setSleepLogs(data);
+        setCached("sleep", data);
+      }
       setLoading(false);
     };
 
