@@ -186,7 +186,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen pt-20 pb-8 px-4">
+    <div className="min-h-screen pt-16 sm:pt-20 pb-24 sm:pb-8 px-4">
       <Navbar />
 
       <div className="max-w-4xl mx-auto">

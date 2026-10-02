@@ -98,7 +98,7 @@ export default function UserSummaryPage() {
   );
 
   return (
-    <div className="min-h-screen pt-20 pb-8 px-4">
+    <div className="min-h-screen pt-16 sm:pt-20 pb-24 sm:pb-8 px-4">
       <Navbar />
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
