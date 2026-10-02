@@ -84,10 +84,10 @@ export function calculateArcScore(
 }
 
 export function getStreakColor(streak: number): string {
-  if (streak >= 30) return "text-emerald-400";
-  if (streak >= 14) return "text-sky-400";
-  if (streak >= 7) return "text-violet-400";
-  if (streak >= 3) return "text-accent-teal";
+  if (streak >= 30) return "text-white";
+  if (streak >= 14) return "text-orange-300";
+  if (streak >= 7) return "text-orange-400";
+  if (streak >= 3) return "text-accent-orange";
   return "text-muted";
 }
 
@@ -102,11 +102,11 @@ export function getStreakEmoji(streak: number): string {
 }
 
 export function getSleepColor(hours: number): string {
-  if (hours >= 9) return "#10b981";
-  if (hours >= 8) return "#22c55e";
-  if (hours >= 7) return "#eab308";
-  if (hours >= 6) return "#f97316";
-  return "#ef4444";
+  if (hours >= 9) return "#fb923c";
+  if (hours >= 8) return "#f97316";
+  if (hours >= 7) return "#ea580c";
+  if (hours >= 6) return "#c2410c";
+  return "#525252";
 }
 
 export function getSleepLabel(hours: number): string {

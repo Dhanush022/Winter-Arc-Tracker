@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { getToday, getDayNumber, formatDate, getDateFromDay, getMonthFromDay, cn } from "@/lib/utils";
 import { MONTHS, MAX_FREEZES } from "@/lib/types";
 import type { Habit, HabitLog, StreakFreeze } from "@/lib/types";
@@ -142,10 +143,11 @@ export default function HabitsPage() {
 
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold tracking-tighter text-white">HABIT GRID</h1>
-            <p className="text-muted text-xs mt-1">90 days of discipline</p>
+            <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// DAILY OATH</div>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">Habits<span className="text-accent-orange">.</span></h1>
+            <p className="text-muted text-sm mt-2">90 days of discipline</p>
           </div>
           <button
             onClick={() => setShowFreezeModal(true)}
@@ -201,8 +203,9 @@ export default function HabitsPage() {
                   const isToday = date === today;
 
                   return (
-                    <button
+                    <motion.button
                       key={day}
+                      whileTap={!isFuture ? { scale: 0.75 } : undefined}
                       onClick={() => !isFuture && toggleHabit(habit.id, date)}
                       disabled={isFuture}
                       className={cn(
@@ -215,8 +218,17 @@ export default function HabitsPage() {
                         isToday && "ring-1 ring-accent-teal/50"
                       )}
                     >
-                      {completed && <span className="text-accent-teal">✓</span>}
-                    </button>
+                      {completed && (
+                        <motion.span
+                          initial={{ scale: 0, rotate: -90 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                          className="text-accent-teal inline-block"
+                        >
+                          ✓
+                        </motion.span>
+                      )}
+                    </motion.button>
                   );
                 })}
               </div>

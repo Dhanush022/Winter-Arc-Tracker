@@ -370,7 +370,7 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-center gap-3">
                       <div className={`habit-checkbox ${completed ? "checked" : ""}`} />
-                      <span className={`text-sm ${completed ? "text-white" : "text-muted"}`}>
+                      <span className={`text-base ${completed ? "text-white" : "text-muted"}`}>
                         {habit.name}
                       </span>
                     </div>
@@ -470,7 +470,7 @@ export default function DashboardPage() {
               {/* Habit Rows */}
               {visibleHabits.map((habit) => (
                 <div key={habit.id} className="grid grid-cols-[200px_repeat(31,1fr)] gap-1 mb-1">
-                  <div className="text-sm text-muted font-medium truncate pr-2 flex items-center justify-between">
+                  <div className="text-base text-muted font-medium truncate pr-2 flex items-center justify-between">
                     <span>{habit.name}</span>
                     <span className="text-[10px] text-muted-dark">+{HABIT_POINTS[habit.name] || 10}</span>
                   </div>

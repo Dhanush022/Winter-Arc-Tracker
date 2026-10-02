@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
 import { getToday, getSleepColor, cn } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Cell } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 import type { SleepLog } from "@/lib/types";
 
 export default function SleepPage() {
@@ -17,6 +18,7 @@ export default function SleepPage() {
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [hours, setHours] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const today = getToday();
 
@@ -73,6 +75,8 @@ export default function SleepPage() {
       if (data) setSleepLogs((prev) => [data, ...prev]);
     }
     setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
   };
 
   const avgSleep = sleepLogs.length > 0
@@ -85,12 +89,12 @@ export default function SleepPage() {
   }));
 
   const sleepDistribution = [
-    { label: "10+ hrs", count: sleepLogs.filter((s) => s.hours >= 10).length, color: "bg-emerald-500" },
-    { label: "9 hrs", count: sleepLogs.filter((s) => s.hours === 9).length, color: "bg-green-500" },
-    { label: "8 hrs", count: sleepLogs.filter((s) => s.hours === 8).length, color: "bg-yellow-500" },
-    { label: "7 hrs", count: sleepLogs.filter((s) => s.hours === 7).length, color: "bg-orange-500" },
-    { label: "6 hrs", count: sleepLogs.filter((s) => s.hours === 6).length, color: "bg-red-500" },
-    { label: "<5 hrs", count: sleepLogs.filter((s) => s.hours < 5).length, color: "bg-red-700" },
+    { label: "10+ hrs", count: sleepLogs.filter((s) => s.hours >= 10).length, color: "bg-orange-300" },
+    { label: "9 hrs", count: sleepLogs.filter((s) => s.hours === 9).length, color: "bg-orange-400" },
+    { label: "8 hrs", count: sleepLogs.filter((s) => s.hours === 8).length, color: "bg-orange-500" },
+    { label: "7 hrs", count: sleepLogs.filter((s) => s.hours === 7).length, color: "bg-orange-600" },
+    { label: "6 hrs", count: sleepLogs.filter((s) => s.hours === 6).length, color: "bg-orange-700" },
+    { label: "<5 hrs", count: sleepLogs.filter((s) => s.hours < 5).length, color: "bg-neutral-600" },
   ];
 
   if (authLoading || loading) {
@@ -108,18 +112,23 @@ export default function SleepPage() {
       <Navbar />
 
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tighter text-white">SLEEP</h1>
-          <p className="text-muted text-xs mt-1">Track your nightly rest</p>
+        <div className="mb-8 flex items-end justify-between">
+          <div>
+            <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// NIGHTLY REST</div>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">Sleep<span className="text-accent-orange">.</span></h1>
+          </div>
+          <div className="hidden md:block text-right font-mono text-[10px] text-muted-dark tracking-widest">
+            {sleepLogs.length} NIGHTS LOGGED<br />AVG {avgSleep.toFixed(1)}H
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Input */}
-          <div className="card p-5">
-            <h2 className="text-lg font-bold text-white mb-4">Log Sleep</h2>
+          <motion.div className="card p-5" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+            <h2 className="text-xl font-bold text-white mb-4">Log Sleep</h2>
 
             <div className="mb-4">
-              <label className="block text-xs text-muted-dark mb-1">Date</label>
+              <label className="block text-sm text-muted-dark mb-1">Date</label>
               <input
                 type="date"
                 value={selectedDate}
@@ -130,7 +139,7 @@ export default function SleepPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs text-muted-dark mb-1">Hours Slept</label>
+              <label className="block text-sm text-muted-dark mb-1">Hours Slept</label>
               <input
                 type="number" min="0"
                 step="0.5"
@@ -138,27 +147,40 @@ export default function SleepPage() {
                 value={hours}
                 onChange={(e) => setHours(e.target.value)}
                 placeholder="8"
-                className="input-field w-full"
+                className="input-field w-full text-2xl font-bold"
               />
             </div>
 
-            <button onClick={saveSleep} disabled={saving} className="w-full bg-accent-teal text-black font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-all">
+            <motion.button whileTap={{ scale: 0.96 }} onClick={saveSleep} disabled={saving} className="w-full bg-accent-teal text-black font-semibold px-6 py-3.5 rounded-lg hover:opacity-90 transition-all text-base">
               {saving ? "Saving..." : "Save Sleep"}
-            </button>
+            </motion.button>
+
+            <AnimatePresence>
+              {saved && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -6 }}
+                  className="mt-3 text-center text-accent-orange font-semibold tracking-wide"
+                >
+                  ✓ SAVED TO THE LOG
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Stats */}
             <div className="mt-6 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-muted text-sm">Average Sleep</span>
-                <span className="text-lg font-bold text-accent-teal">{avgSleep.toFixed(1)}h</span>
+                <span className="text-muted text-base">Average Sleep</span>
+                <span className="text-2xl font-bold text-accent-teal">{avgSleep.toFixed(1)}h</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted text-sm">Total Nights</span>
-                <span className="text-lg font-bold text-white">{sleepLogs.length}</span>
+                <span className="text-muted text-base">Total Nights</span>
+                <span className="text-2xl font-bold text-white">{sleepLogs.length}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted text-sm">Best Night</span>
-                <span className="text-lg font-bold text-accent-teal">
+                <span className="text-muted text-base">Best Night</span>
+                <span className="text-2xl font-bold text-accent-teal">
                   {sleepLogs.length > 0 ? Math.max(...sleepLogs.map((s) => s.hours)) : 0}h
                 </span>
               </div>
@@ -182,7 +204,7 @@ export default function SleepPage() {
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Charts */}
           <div className="lg:col-span-2 space-y-4">

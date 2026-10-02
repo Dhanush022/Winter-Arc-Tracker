@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
 import { getToday } from "@/lib/utils";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 import type { MacroLog } from "@/lib/types";
 
 export default function MacrosPage() {
@@ -20,6 +21,7 @@ export default function MacrosPage() {
   const [fat, setFat] = useState("");
   const [calories, setCalories] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const today = getToday();
   const macroTargets = profile?.macro_targets || { protein: 150, carbs: 250, fat: 70, calories: 2500 };
@@ -103,6 +105,8 @@ export default function MacrosPage() {
       if (data) setMacroLogs((prev) => [data, ...prev]);
     }
     setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
   };
 
   const currentMacros = macroLogs.find((m) => m.date === selectedDate);
@@ -112,7 +116,7 @@ export default function MacrosPage() {
     ? [
         { name: "Protein", value: currentMacros.protein * 4, color: "#f97316" },
         { name: "Carbs", value: currentMacros.carbs * 4, color: "#9ca3af" },
-        { name: "Fat", value: currentMacros.fat * 9, color: "#f97316" },
+        { name: "Fat", value: currentMacros.fat * 9, color: "#e5e7eb" },
       ]
     : [];
 
@@ -138,18 +142,23 @@ export default function MacrosPage() {
       <Navbar />
 
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tighter text-white">MACROS</h1>
-          <p className="text-muted text-xs mt-1">Track your nutrition</p>
+        <div className="mb-8 flex items-end justify-between">
+          <div>
+            <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// FUEL INTAKE</div>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">Macros<span className="text-accent-orange">.</span></h1>
+          </div>
+          <div className="hidden md:block text-right font-mono text-[10px] text-muted-dark tracking-widest">
+            TARGET {macroTargets.protein}P · {macroTargets.carbs}C · {macroTargets.fat}F<br />{macroTargets.calories} KCAL
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Input Form */}
-          <div className="card p-5">
-            <h2 className="text-lg font-bold text-white mb-4">Log Macros</h2>
+          <motion.div className="card p-5" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+            <h2 className="text-xl font-bold text-white mb-4">Log Macros</h2>
 
             <div className="mb-4">
-              <label className="block text-xs text-muted-dark mb-1">Date</label>
+              <label className="block text-sm text-muted-dark mb-1">Date</label>
               <input
                 type="date"
                 value={selectedDate}
@@ -161,50 +170,63 @@ export default function MacrosPage() {
 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div>
-                <label className="block text-xs text-muted-dark mb-1">Protein (g)</label>
+                <label className="block text-sm text-muted-dark mb-1">Protein (g)</label>
                 <input
                   type="number" min="0"
                   value={protein}
                   onChange={(e) => setProtein(e.target.value)}
                   placeholder={macroTargets.protein.toString()}
-                  className="input-field w-full"
+                  className="input-field w-full text-xl font-bold"
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-dark mb-1">Carbs (g)</label>
+                <label className="block text-sm text-muted-dark mb-1">Carbs (g)</label>
                 <input
                   type="number" min="0"
                   value={carbs}
                   onChange={(e) => setCarbs(e.target.value)}
                   placeholder={macroTargets.carbs.toString()}
-                  className="input-field w-full"
+                  className="input-field w-full text-xl font-bold"
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-dark mb-1">Fat (g)</label>
+                <label className="block text-sm text-muted-dark mb-1">Fat (g)</label>
                 <input
                   type="number" min="0"
                   value={fat}
                   onChange={(e) => setFat(e.target.value)}
                   placeholder={macroTargets.fat.toString()}
-                  className="input-field w-full"
+                  className="input-field w-full text-xl font-bold"
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-dark mb-1">Calories</label>
+                <label className="block text-sm text-muted-dark mb-1">Calories</label>
                 <input
                   type="number" min="0"
                   value={calories}
                   onChange={(e) => setCalories(e.target.value)}
                   placeholder={macroTargets.calories.toString()}
-                  className="input-field w-full"
+                  className="input-field w-full text-xl font-bold"
                 />
               </div>
             </div>
 
-            <button onClick={saveMacros} disabled={saving} className="w-full bg-accent-teal text-black font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-all">
+            <motion.button whileTap={{ scale: 0.96 }} onClick={saveMacros} disabled={saving} className="w-full bg-accent-teal text-black font-semibold px-6 py-3.5 rounded-lg hover:opacity-90 transition-all text-base">
               {saving ? "Saving..." : "Save Macros"}
-            </button>
+            </motion.button>
+
+            <AnimatePresence>
+              {saved && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -6 }}
+                  className="mt-3 text-center text-accent-orange font-semibold tracking-wide"
+                >
+                  ✓ LOGGED TO THE LEDGER
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Progress Bars */}
             {currentMacros && (
@@ -259,7 +281,7 @@ export default function MacrosPage() {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* Charts */}
           <div className="space-y-4">

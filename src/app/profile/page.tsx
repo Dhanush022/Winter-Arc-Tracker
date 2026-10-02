@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 import type { WeeklyCheckin, MonthlyReflection } from "@/lib/types";
 
 const AVATAR_COLORS = [
-  "#f97316", "#9ca3af", "#b388ff", "#ff80ab", "#f97316",
-  "#ef4444", "#22c55e", "#eab308", "#ec4899", "#6366f1",
+  "#f97316", "#fb923c", "#ea580c", "#c2410c", "#9ca3af",
+  "#6b7280", "#d4d4d4", "#737373", "#262626", "#fafafa",
 ];
 
 export default function ProfilePage() {
@@ -192,9 +192,10 @@ export default function ProfilePage() {
       <Navbar />
 
       <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tighter text-white">PROFILE</h1>
-          <p className="text-muted text-xs mt-1">Manage your settings</p>
+        <div className="mb-8">
+          <div className="font-mono text-[11px] tracking-[0.3em] text-accent-orange mb-2">// ACCOUNT</div>
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">Profile<span className="text-accent-orange">.</span></h1>
+          <p className="text-muted text-sm mt-2">Manage your settings</p>
         </div>
 
         {/* Tabs */}
