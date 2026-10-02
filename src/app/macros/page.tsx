@@ -307,7 +307,14 @@ export default function MacrosPage() {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "8px" }}
+                        formatter={(value: number, name: string) => {
+                          const grams = name === "Fat" ? currentMacros!.fat : name === "Carbs" ? currentMacros!.carbs : currentMacros!.protein;
+                          return [`${grams}g · ${value} kcal`, name];
+                        }}
+                        unit=""
+                      />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
