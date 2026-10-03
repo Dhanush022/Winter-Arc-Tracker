@@ -806,7 +806,9 @@ const todayScore = completedToday.reduce((sum, l) => {
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-3 text-sm text-accent-orange font-mono"
                 >
-                  {todayWorkout === "Rest" ? "✓ Rest day logged." : `✓ ${todayWorkout} day logged as complete.`}
+                  {todayWorkout === "Rest"
+                    ? `✓ Rest day logged on ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`
+                    : `✓ ${todayWorkout} day logged on ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`}
                 </motion.p>
               )}
             </div>

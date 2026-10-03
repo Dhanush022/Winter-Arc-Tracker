@@ -166,7 +166,7 @@ export default function UserSummaryPage() {
               </p>
               <p className="text-muted text-sm mt-1">
                 {todayWorkout
-                  ? `Today: ${todayWorkout.split}`
+                  ? `Today (${new Date(todayWorkout.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}): ${todayWorkout.split}`
                   : latestWorkout
                     ? `Last workout: ${latestWorkout.split} on ${new Date(latestWorkout.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
                     : "No workout logs yet"}

@@ -349,7 +349,7 @@ export default function MacrosPage() {
               <h3 className="text-sm font-bold text-white mb-2">Today / Last Workout</h3>
               <p className="text-muted text-sm">
                 {todayWorkout
-                  ? `Today: ${todayWorkout.split}`
+                  ? `Today (${new Date(todayWorkout.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}): ${todayWorkout.split}`
                   : latestWorkout
                     ? `Last workout: ${latestWorkout.split} on ${new Date(latestWorkout.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
                     : "No workout logs yet"}
