@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS habit_logs (
   habit_id UUID NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   completed BOOLEAN DEFAULT FALSE,
+  steps INTEGER DEFAULT 0,
+  water INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, habit_id, date)
 );
@@ -185,14 +187,10 @@ BEGIN
     (NEW.id, '10,000 Steps', FALSE, 2),
     (NEW.id, 'Drink 3L Water', FALSE, 3),
     (NEW.id, 'No Junk Food', FALSE, 4),
-    (NEW.id, 'Healthy Meals', FALSE, 5),
-    (NEW.id, 'Read / Learn', FALSE, 6),
-    (NEW.id, 'Meditate / Journal', FALSE, 7),
-    (NEW.id, 'Wake Up Early', FALSE, 8),
-    (NEW.id, 'Sleep On Time', FALSE, 9),
-    (NEW.id, 'Be Productive', FALSE, 10),
-    (NEW.id, 'Custom Habit 1', TRUE, 11),
-    (NEW.id, 'Custom Habit 2', TRUE, 12);
+    (NEW.id, 'Read / Learn', FALSE, 5),
+    (NEW.id, 'Be Productive', FALSE, 6),
+    (NEW.id, 'Custom Habit 1', TRUE, 7),
+    (NEW.id, 'Custom Habit 2', TRUE, 8);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

@@ -7,8 +7,8 @@ import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
 import { getCached, setCached } from "@/lib/cache";
 import { motion, AnimatePresence } from "framer-motion";
-import { getToday, getDayNumber, formatDate, getDateFromDay, getMonthFromDay, cn } from "@/lib/utils";
-import { MONTHS, MAX_FREEZES } from "@/lib/types";
+import { getToday, getDayNumber, formatDate, getDateFromDay, getMonthFromDay, cn, sleepPoints, stepPoints, waterPoints } from "@/lib/utils";
+import { MONTHS, MAX_FREEZES, isHiddenHabit } from "@/lib/types";
 import type { Habit, HabitLog, StreakFreeze } from "@/lib/types";
 
 const HABIT_POINTS: Record<string, number> = {
@@ -30,6 +30,9 @@ export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>(() => getCached<Habit[]>("habits_habits") ?? []);
   const [logs, setLogs] = useState<HabitLog[]>(() => getCached<HabitLog[]>("habits_logs") ?? []);
   const [freezes, setFreezes] = useState<StreakFreeze[]>(() => getCached<StreakFreeze[]>("habits_freezes") ?? []);
+  const [todaySteps, setTodaySteps] = useState(0);
+  const [todayWater, setTodayWater] = useState(0);
+  const [sleepHours, setSleepHours] = useState("");
   const [, setLoading] = useState(() => getCached("habits_logs") === undefined);
   const [lastAction, setLastAction] = useState("");
   const [activeMonth, setActiveMonth] = useState(getMonthFromDay(getDayNumber(getToday())));
@@ -38,8 +41,12 @@ export default function HabitsPage() {
   const today = getToday();
 
   const visibleHabits = habits.filter(
-    (h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))
+    (h) => !isHiddenHabit(h)
   );
+
+  const stepPts = stepPoints(todaySteps);
+  const waterPts = waterPoints(todayWater);
+  const sleepPts = sleepPoints(Math.max(0, Number(sleepHours) || 0));
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -66,12 +73,34 @@ export default function HabitsPage() {
 
       if (logsData) { setLogs(logsData); setCached("habits_logs", logsData); }
 
+      const { data: sleepData } = await supabase
+        .from("sleep_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", today)
+        .maybeSingle();
+      if (sleepData) setSleepHours(sleepData.hours.toString());
+
       const { data: freezesData } = await supabase
         .from("streak_freezes")
         .select("*")
         .eq("user_id", user.id);
 
       if (freezesData) { setFreezes(freezesData); setCached("habits_freezes", freezesData); }
+
+      // Pre-fill metric sliders for today
+      if (logsData && habitsData) {
+        const stepsId = habitsData.find((h) => h.name === "10,000 Steps")?.id;
+        const waterId = habitsData.find((h) => h.name === "Drink 3L Water")?.id;
+        if (stepsId) {
+          const row = logsData.find((l) => l.habit_id === stepsId && l.date === today)
+          setTodaySteps(row?.steps ?? 0);
+        }
+        if (waterId) {
+          const row = logsData.find((l) => l.habit_id === waterId && l.date === today)
+          setTodayWater(row?.water ?? 0);
+        }
+      }
 
       setLoading(false);
     };
@@ -80,6 +109,40 @@ export default function HabitsPage() {
     window.addEventListener("winter-data-changed", fetchData);
     return () => window.removeEventListener("winter-data-changed", fetchData);
   }, [user]);
+
+  const persistMetricHere = async (habitName: string, patch: Partial<Pick<HabitLog, "steps" | "water">>, val: number) => {
+    const habit = habits.find((h) => h.name === habitName);
+    if (!habit) return;
+    const existing = logs.find((l) => l.habit_id === habit.id && l.date === today);
+    if (existing) {
+      await supabase.from("habit_logs").update(patch).eq("id", existing.id);
+      setLogs((prev) => prev.map((l) => (l.id === existing.id ? { ...l, ...patch } : l)));
+    } else {
+      const { data } = await supabase
+        .from("habit_logs")
+        .insert({ user_id: user!.id, habit_id: habit.id, date: today, completed: val > 0, ...patch })
+        .select()
+        .single();
+      if (data) setLogs((prev) => [...prev, data]);
+    }
+    window.dispatchEvent(new Event("winter-data-changed"));
+  };
+
+  const upsertSleepHere = async (date: string, hours: number) => {
+    const { data: existing } = await supabase
+      .from("sleep_logs")
+      .select("*")
+      .eq("user_id", user!.id)
+      .eq("date", date)
+      .maybeSingle();
+    if (existing) {
+      await supabase.from("sleep_logs").update({ hours }).eq("id", existing.id);
+    } else {
+      await supabase.from("sleep_logs").insert({ user_id: user!.id, date, hours });
+    }
+    setSleepHours(hours.toString());
+    window.dispatchEvent(new Event("winter-data-changed"));
+  };
 
   const toggleHabit = async (habitId: string, date: string) => {
     const existing = logs.find((l) => l.habit_id === habitId && l.date === date);
@@ -179,6 +242,67 @@ export default function HabitsPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Today's Metrics */}
+        <div className="card p-4 mb-4">
+          <h2 className="text-sm font-mono text-muted-dark tracking-widest uppercase mb-3">Today&apos;s Metrics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="p-3 rounded-xl border border-surface-border bg-surface-light/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-base text-muted">👟 Steps</span>
+                <span className="text-xs font-mono text-accent-orange">+{stepPts}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={10000}
+                step={500}
+                value={todaySteps}
+                onChange={(e) => setTodaySteps(Number(e.target.value))}
+                onPointerUp={() => persistMetricHere("10,000 Steps", { steps: todaySteps }, todaySteps)}
+                onKeyUp={() => persistMetricHere("10,000 Steps", { steps: todaySteps }, todaySteps)}
+                className="w-full accent-orange-500"
+              />
+              <div className="text-xs text-muted-dark font-mono mt-1">{todaySteps.toLocaleString()} / 10,000</div>
+            </div>
+            <div className="p-3 rounded-xl border border-surface-border bg-surface-light/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-base text-muted">💧 Water</span>
+                <span className="text-xs font-mono text-accent-orange">+{waterPts}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={4000}
+                step={100}
+                value={todayWater}
+                onChange={(e) => setTodayWater(Number(e.target.value))}
+                onPointerUp={() => persistMetricHere("Drink 3L Water", { water: todayWater }, todayWater)}
+                onKeyUp={() => persistMetricHere("Drink 3L Water", { water: todayWater }, todayWater)}
+                className="w-full accent-orange-500"
+              />
+              <div className="text-xs text-muted-dark font-mono mt-1">{(todayWater / 1000).toFixed(1)}L / 4.0L</div>
+            </div>
+            <div className="p-3 rounded-xl border border-surface-border bg-surface-light/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-base text-muted">😴 Sleep</span>
+                <span className="text-xs font-mono text-accent-orange">+{sleepPts}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={12}
+                step={0.5}
+                value={Number(sleepHours) || 0}
+                onChange={(e) => setSleepHours(e.target.value)}
+                onPointerUp={() => upsertSleepHere(today, Math.max(0, Number(sleepHours) || 0))}
+                onKeyUp={() => upsertSleepHere(today, Math.max(0, Number(sleepHours) || 0))}
+                className="w-full accent-orange-500"
+              />
+              <div className="text-xs text-muted-dark font-mono mt-1">{(Number(sleepHours) || 0).toFixed(1)} h</div>
+            </div>
+          </div>
+        </div>
 
         {/* Month Tabs */}
         <div className="flex gap-2 mb-4">

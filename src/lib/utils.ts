@@ -101,6 +101,19 @@ export function getStreakEmoji(streak: number): string {
   return "💨";
 }
 
+export function sleepPoints(hours: number): number {
+  if (hours >= 8) return 10;
+  return Math.max(0, Math.floor((hours / 8) * 10));
+}
+
+export function stepPoints(steps: number): number {
+  return Math.min(10, Math.floor(steps / 1000));
+}
+
+export function waterPoints(ml: number): number {
+  return Math.min(10, Math.floor(ml / 400));
+}
+
 export function getSleepColor(hours: number): string {
   if (hours >= 9) return "#fb923c";
   if (hours >= 8) return "#ea580c";

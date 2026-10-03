@@ -28,6 +28,8 @@ export interface HabitLog {
   habit_id: string;
   date: string;
   completed: boolean;
+  steps?: number;
+  water?: number;
 }
 
 export interface SleepLog {
@@ -112,6 +114,18 @@ export const DEFAULT_HABITS = [
   "Sleep On Time",
   "Be Productive",
 ];
+
+// habits we no longer track (removed from both the UI and the DB)
+export const REMOVED_HABITS = [
+  "Healthy Meals",
+  "Meditate / Journal",
+  "Wake Up Early",
+  "Sleep On Time",
+];
+
+export const isHiddenHabit = (habit: { name: string; custom: boolean }) =>
+  (habit.custom && (habit.name === "Custom Habit 1" || habit.name === "Custom Habit 2")) ||
+  REMOVED_HABITS.includes(habit.name);
 
 export const ARC_START_DATE = new Date("2026-10-01");
 export const ARC_END_DATE = new Date("2026-12-31");

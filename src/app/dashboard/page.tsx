@@ -8,8 +8,8 @@ import LeaderboardList from "@/components/LeaderboardList";
 import { GalleryHeading } from "@/shaders/neuform-isolated/NeuformIsolatedEffects";
 import "@/shaders/threeui.css";
 import { useRouter } from "next/navigation";
-import { getToday, getDayNumber, calculateStreak, cn } from "@/lib/utils";
-import { MAX_FREEZES } from "@/lib/types";
+import { getToday, getDayNumber, calculateStreak, cn, sleepPoints, stepPoints, waterPoints } from "@/lib/utils";
+import { MAX_FREEZES, isHiddenHabit } from "@/lib/types";
 import { getCached, setCached } from "@/lib/cache";
 import { motion } from "framer-motion";
 import type { Habit, HabitLog, SleepLog, StreakFreeze, MacroLog } from "@/lib/types";
@@ -47,6 +47,12 @@ export default function DashboardPage() {
   const [sleepSaved, setSleepSaved] = useState(false);
   const [sleepError, setSleepError] = useState("");
 
+  // Steps / water sliders
+  const [todaySteps, setTodaySteps] = useState(0);
+  const [todayWater, setTodayWater] = useState(0);
+  const [importing, setImporting] = useState(false);
+  const [lastImport, setLastImport] = useState<string>("");
+
   // Macro fields
   const [macroProtein, setMacroProtein] = useState("");
   const [macroCarbs, setMacroCarbs] = useState("");
@@ -79,11 +85,29 @@ export default function DashboardPage() {
       if (habitsRes.data) setHabits(habitsRes.data);
       if (logsRes.data) {
         setAllLogs(logsRes.data);
-        const count = (habitsRes.data ?? []).filter((h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))).length;
+        const count = (habitsRes.data ?? []).filter((h) => !isHiddenHabit(h)).length;
         setStreak(calculateStreak(logsRes.data, count));
       }
-      if (sleepRes.data) setSleepLogs(sleepRes.data);
+      if (sleepRes.data) {
+        setSleepLogs(sleepRes.data);
+        const todaySleep = sleepRes.data.find((s) => s.date === today);
+        if (todaySleep) setSleepHours(todaySleep.hours.toString());
+      }
       if (freezesRes.data) setFreezes(freezesRes.data);
+
+      // Pre-fill steps / water for today
+      if (logsRes.data && habitsRes.data) {
+        const stepsId = habitsRes.data.find((h) => h.name === "10,000 Steps")?.id;
+        const waterId = habitsRes.data.find((h) => h.name === "Drink 3L Water")?.id;
+        if (stepsId) {
+          const row = logsRes.data.find((l) => l.habit_id === stepsId && l.date === today)
+          setTodaySteps(row?.steps ?? 0);
+        }
+        if (waterId) {
+          const row = logsRes.data.find((l) => l.habit_id === waterId && l.date === today)
+          setTodayWater(row?.water ?? 0);
+        }
+      }
 
       // Pre-fill macro fields for today
       if (macrosRes.data && macrosRes.data.length > 0) {
@@ -181,6 +205,168 @@ export default function DashboardPage() {
     router.refresh(); window.dispatchEvent(new Event("winter-data-changed"));
   };
 
+  const persistMetric = async (habitName: string, patch: Partial<Pick<HabitLog, "steps" | "water">>, val: number) => {
+    const habit = habits.find((h) => h.name === habitName);
+    if (!habit) return;
+    const existing = allLogs.find((l) => l.habit_id === habit.id && l.date === today);
+    if (existing) {
+      await supabase.from("habit_logs").update(patch).eq("id", existing.id);
+      setAllLogs((prev) => prev.map((l) => (l.id === existing.id ? { ...l, ...patch } : l)));
+    } else {
+      const { data } = await supabase
+        .from("habit_logs")
+        .insert({ user_id: user!.id, habit_id: habit.id, date: today, completed: val > 0, ...patch })
+        .select()
+        .single();
+      if (data) setAllLogs((prev) => [...prev, data]);
+    }
+  };
+
+  const upsertSleepForDate = async (date: string, hours: number) => {
+    const existing = sleepLogs.find((s) => s.date === date);
+    if (existing) {
+      await supabase.from("sleep_logs").update({ hours }).eq("id", existing.id);
+      setSleepLogs((prev) => prev.map((s) => (s.id === existing.id ? { ...s, hours } : s)));
+    } else {
+      const { data } = await supabase.from("sleep_logs").insert({ user_id: user!.id, date, hours }).select().single();
+      if (data) setSleepLogs((prev) => [data, ...prev]);
+    }
+  };
+
+  const upsertHabitMetricForDate = async (habitName: string, date: string, patch: Partial<Pick<HabitLog, "steps" | "water">>, completed: boolean) => {
+    const habit = habits.find((h) => h.name === habitName);
+    if (!habit) return;
+    const existing = allLogs.find((l) => l.habit_id === habit.id && l.date === date);
+    if (existing) {
+      await supabase.from("habit_logs").update(patch).eq("id", existing.id);
+      setAllLogs((prev) => prev.map((l) => (l.id === existing.id ? { ...l, ...patch } : l)));
+    } else {
+      const { data } = await supabase
+        .from("habit_logs")
+        .insert({ user_id: user!.id, habit_id: habit.id, date, completed, ...patch })
+        .select()
+        .single();
+      if (data) setAllLogs((prev) => [...prev, data]);
+    }
+  };
+
+  const handleImportFile = async (file: File) => {
+    setImporting(true);
+    try {
+      const safeParseNumber = (v: unknown) => Math.max(0, Number(v) || 0);
+      const filesText: string[] = [];
+      if (file.name.toLowerCase().endsWith(".zip")) {
+        const JSZip = (await import("jszip")).default;
+        const zip = await JSZip.loadAsync(file);
+        for (const name of Object.keys(zip.files)) {
+          if (zip.files[name].dir) continue;
+          filesText.push(await zip.files[name].async("string"));
+        }
+      } else {
+        filesText.push(await file.text());
+      }
+
+      for (const text of filesText) {
+        const trimmed = text.trim();
+        if (!trimmed) continue;
+
+        // Apple Health export.xml
+        if (trimmed.includes("<HealthData") || trimmed.includes("export.xml")) {
+          try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(trimmed, "text/xml");
+            const records = doc.getElementsByTagName("Record");
+            const byDateSteps = new Map<string, number>();
+            const byDateSleep = new Map<string, number>();
+
+            for (let i = 0; i < records.length; i++) {
+              const r = records[i];
+              const type = r.getAttribute("type") || "";
+              const start = r.getAttribute("startDate") || "";
+              const end = r.getAttribute("endDate") || "";
+              if (!start || !end) continue;
+              const dateStr = new Date(start).toISOString().split("T")[0];
+              if (type.includes("StepCount")) {
+                const v = safeParseNumber(r.getAttribute("value"));
+                byDateSteps.set(dateStr, (byDateSteps.get(dateStr) || 0) + v);
+              } else if (type.includes("SleepAnalysis")) {
+                const v = r.getAttribute("value") || "";
+                if (v.includes("Asleep") || v.includes("asleep")) {
+                  const hours = Math.max(0, (new Date(end).getTime() - new Date(start).getTime()) / 3600000);
+                  byDateSleep.set(dateStr, (byDateSleep.get(dateStr) || 0) + hours);
+                }
+              }
+            }
+
+            for (const [dateStr, steps] of Array.from(byDateSteps.entries())) {
+              await upsertHabitMetricForDate("10,000 Steps", dateStr, { steps: Math.round(steps) }, steps > 0);
+            }
+            for (const [dateStr, hours] of Array.from(byDateSleep.entries())) {
+              await upsertSleepForDate(dateStr, Math.round(hours * 10) / 10);
+            }
+          } catch {
+            // ignore malformed XML
+          }
+          continue;
+        }
+
+        // CSV-ish exports (Samsung Health / Google Takeout)
+        const lower = trimmed.toLowerCase();
+        const lines = trimmed.split(/\r?\n/);
+        if (!lines.length) continue;
+        const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/[^a-z0-9]/g, "_"));
+        const stepIdx = headers.findIndex((h) => h.includes("step") || h.includes("count"));
+        const dateIdx = headers.findIndex((h) => h.includes("date") || h.includes("time") || h.includes("start"));
+        const sleepStartIdx = headers.findIndex((h) => h.includes("start") && h.includes("time"));
+        const sleepEndIdx = headers.findIndex((h) => h.includes("end") && h.includes("time"));
+
+        if (lower.includes("sleep") && sleepStartIdx >= 0 && sleepEndIdx >= 0) {
+          const byDate = new Map<string, number>();
+          for (let i = 1; i < lines.length; i++) {
+            const cols = lines[i].split(",");
+            const start = cols[sleepStartIdx];
+            const end = cols[sleepEndIdx];
+            if (!start || !end) continue;
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) continue;
+            const dateStr = startDate.toISOString().split("T")[0];
+            const hours = Math.max(0, (endDate.getTime() - startDate.getTime()) / 3600000);
+            byDate.set(dateStr, (byDate.get(dateStr) || 0) + hours);
+          }
+          for (const [dateStr, hours] of Array.from(byDate.entries())) {
+            await upsertSleepForDate(dateStr, Math.round(hours * 10) / 10);
+          }
+          continue;
+        }
+
+        if (stepIdx >= 0 && dateIdx >= 0) {
+          const byDate = new Map<string, number>();
+          for (let i = 1; i < lines.length; i++) {
+            const cols = lines[i].split(",");
+            const p = safeParseNumber(cols[stepIdx]);
+            const d = cols[dateIdx];
+            if (!d) continue;
+            const dateStr = new Date(d).toISOString().split("T")[0];
+            byDate.set(dateStr, (byDate.get(dateStr) || 0) + p);
+          }
+          for (const [dateStr, steps] of Array.from(byDate.entries())) {
+            await upsertHabitMetricForDate("10,000 Steps", dateStr, { steps: Math.round(steps) }, steps > 0);
+          }
+        }
+      }
+
+      setLastImport(new Date().toLocaleString());
+      router.refresh();
+      window.dispatchEvent(new Event("winter-data-changed"));
+    } catch (err) {
+      console.error("Import failed", err);
+      alert("Could not import that file. Use a Samsung Health ZIP, Apple Health export ZIP, or Google Takeout ZIP/CSV.");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const saveMacros = async () => {
     setSavingMacros(true);
     const existing = macroLogs.find((m) => m.date === today);
@@ -226,12 +412,19 @@ export default function DashboardPage() {
 
   // Hide placeholder custom habits until the user names them in Profile
   const visibleHabits = habits.filter(
-    (h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))
+    (h) => !isHiddenHabit(h)
   );
-  const todayScore = completedToday.reduce((sum, l) => {
+  const sleepPts = sleepPoints(Math.max(0, Number(sleepHours) || 0));
+const stepPts = stepPoints(todaySteps);
+const waterPts = waterPoints(todayWater);
+
+const todayScore = completedToday.reduce((sum, l) => {
     const habit = habits.find((h) => h.id === l.habit_id);
-    return sum + (habit ? HABIT_POINTS[habit.name] || 10 : 10);
-  }, 0);
+    if (!habit) return sum + 10;
+    if (habit.name === "10,000 Steps") return sum + stepPts;
+    if (habit.name === "Drink 3L Water") return sum + waterPts;
+    return sum + (HABIT_POINTS[habit.name] || 10);
+  }, sleepPts);
 
   const completionPct = visibleHabits.length > 0 ? (completedToday.length / visibleHabits.length) * 100 : 0;
 
@@ -320,7 +513,7 @@ export default function DashboardPage() {
               HOLD THE LINE, <span className="italic font-serif font-normal text-white/70">{profile?.full_name?.split(" ")[0]?.toUpperCase() || "WARRIOR"}</span>
             </h1>
           </div>
-          <div className="flex gap-3 mt-4 sm:mt-0">
+          <div className="flex gap-3 mt-4 sm:mt-0 items-stretch">
             <div className="card px-4 py-2 flex items-center gap-2">
               <span className="text-accent-orange">🔥</span>
               <div>
@@ -334,6 +527,27 @@ export default function DashboardPage() {
                 <div className="text-white font-bold">{freezesLeft}</div>
                 <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">FREEZES</div>
               </div>
+            </div>
+            <div className="card px-4 py-2 flex items-center gap-3">
+              <div>
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest uppercase">Import Data</div>
+                <div className="text-xs text-muted mt-0.5">{lastImport ? `Last import: ${lastImport}` : "Samsung · Apple · Google Takeout"}</div>
+              </div>
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept=".zip,.csv,.xml,.json"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImportFile(file);
+                    e.target.value = "";
+                  }}
+                />
+                <span className="px-3 py-1.5 rounded-lg bg-accent-orange text-black text-xs font-semibold hover:opacity-90 transition-all">
+                  {importing ? "Importing…" : "Upload"}
+                </span>
+              </label>
             </div>
           </div>
         </div>
@@ -357,6 +571,58 @@ export default function DashboardPage() {
                 const log = todayLogs.find((l) => l.habit_id === habit.id);
                 const completed = log?.completed || false;
                 const points = HABIT_POINTS[habit.name] || 10;
+
+                if (habit.name === "10,000 Steps") {
+                  return (
+                    <motion.div
+                      key={habit.id}
+                      className="flex flex-col p-3.5 rounded-xl border border-surface-border bg-surface-light/50"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-base text-muted">👟 Steps</span>
+                        <span className="text-xs font-mono uppercase tracking-wider text-accent-orange">+{stepPts}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={10000}
+                        step={500}
+                        value={todaySteps}
+                        onChange={(e) => setTodaySteps(Number(e.target.value))}
+                        onPointerUp={() => persistMetric("10,000 Steps", { steps: todaySteps }, todaySteps)}
+                        onKeyUp={() => persistMetric("10,000 Steps", { steps: todaySteps }, todaySteps)}
+                        className="w-full accent-orange-500"
+                      />
+                      <div className="text-xs text-muted-dark font-mono mt-1">{todaySteps.toLocaleString()} / 10,000</div>
+                    </motion.div>
+                  );
+                }
+
+                if (habit.name === "Drink 3L Water") {
+                  return (
+                    <motion.div
+                      key={habit.id}
+                      className="flex flex-col p-3.5 rounded-xl border border-surface-border bg-surface-light/50"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-base text-muted">💧 Water</span>
+                        <span className="text-xs font-mono uppercase tracking-wider text-accent-orange">+{waterPts}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={4000}
+                        step={100}
+                        value={todayWater}
+                        onChange={(e) => setTodayWater(Number(e.target.value))}
+                        onPointerUp={() => persistMetric("Drink 3L Water", { water: todayWater }, todayWater)}
+                        onKeyUp={() => persistMetric("Drink 3L Water", { water: todayWater }, todayWater)}
+                        className="w-full accent-orange-500"
+                      />
+                      <div className="text-xs text-muted-dark font-mono mt-1">{(todayWater / 1000).toFixed(1)}L / 4.0L</div>
+                    </motion.div>
+                  );
+                }
 
                 return (
                   <motion.button
@@ -384,6 +650,25 @@ export default function DashboardPage() {
                   </motion.button>
                 );
               })}
+            </div>
+
+            <div className="mt-4 p-3.5 rounded-xl border border-surface-border bg-surface-light/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-base text-muted">😴 Sleep</span>
+                <span className="text-xs font-mono uppercase tracking-wider text-accent-orange">+{sleepPts}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={12}
+                step={0.5}
+                value={Number(sleepHours) || 0}
+                onChange={(e) => setSleepHours(e.target.value)}
+                onPointerUp={() => upsertSleepForDate(today, Math.max(0, Number(sleepHours) || 0))}
+                onKeyUp={() => upsertSleepForDate(today, Math.max(0, Number(sleepHours) || 0))}
+                className="w-full accent-orange-500"
+              />
+              <div className="text-xs text-muted-dark font-mono mt-1">{(Number(sleepHours) || 0).toFixed(1)} h</div>
             </div>
 
             {/* Card footer status */}
@@ -455,6 +740,7 @@ export default function DashboardPage() {
                 className="input-field w-full text-base font-semibold appearance-none cursor-pointer"
               >
                 <option value="">Select split…</option>
+                <option value="Rest">Rest</option>
                 <option value="Push">Push</option>
                 <option value="Pull">Pull</option>
                 <option value="Legs">Legs</option>

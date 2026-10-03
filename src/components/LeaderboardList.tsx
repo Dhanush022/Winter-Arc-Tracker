@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "./AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { calculateStreak, cn } from "@/lib/utils";
+import { isHiddenHabit } from "@/lib/types";
 import type { LeaderboardEntry } from "@/lib/types";
 
 export default function LeaderboardList() {
@@ -34,7 +35,7 @@ export default function LeaderboardList() {
       const leaderboard: LeaderboardEntry[] = profiles.map((p) => {
         const userHabitLogs = habitLogs?.filter((l) => l.user_id === p.id) || [];
         const userHabits = (habits?.filter((h) => h.user_id === p.id) || []).filter(
-          (h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))
+          (h) => !isHiddenHabit(h)
         );
         const currentStreak = calculateStreak(userHabitLogs, userHabits.length);
         const userSleepLogs = sleepLogs?.filter((l) => l.user_id === p.id) || [];

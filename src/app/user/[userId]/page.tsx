@@ -7,6 +7,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { calculateStreak } from "@/lib/utils";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { isHiddenHabit } from "@/lib/types";
 import type { UserProfile, Habit, HabitLog, SleepLog, MacroLog, WeeklyCheckin, StreakFreeze } from "@/lib/types";
 import { getCached, setCached } from "@/lib/cache";
 
@@ -91,7 +92,7 @@ export default function UserSummaryPage() {
   }
 
   const visibleHabits = habits.filter(
-    (h) => !(h.custom && (h.name === "Custom Habit 1" || h.name === "Custom Habit 2"))
+    (h) => !isHiddenHabit(h)
   );
   const streak = calculateStreak(logs, visibleHabits.length);
   const habitCompletionPct = visibleHabits.length && logs.length

@@ -17,6 +17,7 @@
     "@supabase/supabase-js": "^2.117.2",
     "date-fns": "^4.4.0",
     "framer-motion": "^13.5.0",
+    "jszip": "^3.10.2",
     "next": "14.2.35",
     "prisma": "^8.0.0-rc.19",
     "react": "^18",
