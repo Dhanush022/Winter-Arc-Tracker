@@ -222,6 +222,32 @@ export default function DashboardPage() {
     }
   };
 
+  const setWorkoutSplit = async (value: string) => {
+    setTodayWorkout(value);
+    if (!value || value === "Rest") return;
+
+    const habit = habits.find((h) => h.name === "Workout / Exercise");
+    if (!habit) return;
+
+    const existing = allLogs.find((l) => l.habit_id === habit.id && l.date === today);
+    if (existing) {
+      if (!existing.completed) {
+        await supabase.from("habit_logs").update({ completed: true }).eq("id", existing.id);
+        setAllLogs((prev) => prev.map((l) => (l.id === existing.id ? { ...l, completed: true } : l)));
+      }
+    } else {
+      const { data } = await supabase
+        .from("habit_logs")
+        .insert({ user_id: user!.id, habit_id: habit.id, date: today, completed: true })
+        .select()
+        .single();
+      if (data) setAllLogs((prev) => [...prev, data]);
+    }
+
+    router.refresh();
+    window.dispatchEvent(new Event("winter-data-changed"));
+  };
+
   const upsertSleepForDate = async (date: string, hours: number) => {
     const existing = sleepLogs.find((s) => s.date === date);
     if (existing) {
@@ -736,7 +762,7 @@ const todayScore = completedToday.reduce((sum, l) => {
               <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono mb-2">TODAY&apos;S WORKOUT</div>
               <select
                 value={todayWorkout}
-                onChange={(e) => setTodayWorkout(e.target.value)}
+                onChange={(e) => setWorkoutSplit(e.target.value)}
                 className="input-field w-full text-base font-semibold appearance-none cursor-pointer"
               >
                 <option value="">Select split…</option>
@@ -757,7 +783,7 @@ const todayScore = completedToday.reduce((sum, l) => {
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-3 text-sm text-accent-orange font-mono"
                 >
-                  ▸ {todayWorkout} day — go earn it.
+                  {todayWorkout === "Rest" ? "✓ Rest day logged." : `✓ ${todayWorkout} day logged as complete.`}
                 </motion.p>
               )}
             </div>
