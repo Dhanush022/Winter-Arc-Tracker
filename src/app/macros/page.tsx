@@ -9,12 +9,13 @@ import { getToday } from "@/lib/utils";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { getCached, setCached } from "@/lib/cache";
 import { motion, AnimatePresence } from "framer-motion";
-import type { MacroLog } from "@/lib/types";
+import type { MacroLog, WorkoutLog } from "@/lib/types";
 
 export default function MacrosPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const router = useRouter();
   const [macroLogs, setMacroLogs] = useState<MacroLog[]>(() => getCached<MacroLog[]>("macros") ?? []);
+  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>(() => getCached<WorkoutLog[]>("macros_workouts") ?? []);
   const [, setLoading] = useState(() => getCached("macros") === undefined);
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [protein, setProtein] = useState("");
@@ -44,9 +45,20 @@ export default function MacrosPage() {
         .order("date", { ascending: false })
         .limit(90);
 
+      const { data: workoutData } = await supabase
+        .from("workout_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false })
+        .limit(90);
+
       if (data) {
         setMacroLogs(data);
         setCached("macros", data);
+      }
+      if (workoutData) {
+        setWorkoutLogs(workoutData);
+        setCached("macros_workouts", workoutData);
       }
       setLoading(false);
     };
@@ -117,6 +129,16 @@ export default function MacrosPage() {
 
   const currentMacros = macroLogs.find((m) => m.date === selectedDate);
   const weeklyLogs = macroLogs.slice(0, 7);
+
+  const todayWorkout = workoutLogs.find((w) => w.date === today);
+  const latestWorkout = workoutLogs.length > 0 ? workoutLogs[0] : null;
+
+  const workoutData = Object.entries(
+    workoutLogs.reduce<Record<string, number>>((acc, w) => {
+      acc[w.split] = (acc[w.split] || 0) + 1;
+      return acc;
+    }, {})
+  ).map(([split, count]) => ({ split, count }));
 
   const pieData = currentMacros
     ? [
@@ -323,6 +345,37 @@ export default function MacrosPage() {
             </div>
 
             {/* Weekly Trend */}
+            <div className="card p-5">
+              <h3 className="text-sm font-bold text-white mb-2">Today / Last Workout</h3>
+              <p className="text-muted text-sm">
+                {todayWorkout
+                  ? `Today: ${todayWorkout.split}`
+                  : latestWorkout
+                    ? `Last workout: ${latestWorkout.split} on ${new Date(latestWorkout.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                    : "No workout logs yet"}
+              </p>
+
+              <h3 className="text-sm font-bold text-white mt-5 mb-4">Workout Splits</h3>
+              {workoutData.length > 0 ? (
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={workoutData}>
+                      <XAxis dataKey="split" stroke="#64748b" fontSize={10} />
+                      <YAxis allowDecimals={false} stroke="#64748b" fontSize={10} />
+                      <Tooltip contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "8px" }} />
+                      <Legend />
+                      <Bar dataKey="count" fill="#ea580c" name="Days" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="h-48 flex items-center justify-center text-muted-dark">
+                  No workout logs yet
+                </div>
+              )}
+            </div>
+
+
             <div className="card p-5">
               <h3 className="text-sm font-bold text-white mb-4">7-Day Trend</h3>
               {chartData.length > 0 ? (
