@@ -513,7 +513,7 @@ const todayScore = completedToday.reduce((sum, l) => {
               HOLD THE LINE, <span className="italic font-serif font-normal text-white/70">{profile?.full_name?.split(" ")[0]?.toUpperCase() || "WARRIOR"}</span>
             </h1>
           </div>
-          <div className="flex gap-3 mt-4 sm:mt-0 items-stretch">
+          <div className="flex flex-wrap gap-3 mt-4 sm:mt-0 items-stretch">
             <div className="card px-4 py-2 flex items-center gap-2">
               <span className="text-accent-orange">🔥</span>
               <div>
@@ -528,12 +528,12 @@ const todayScore = completedToday.reduce((sum, l) => {
                 <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono">FREEZES</div>
               </div>
             </div>
-            <div className="card px-4 py-2 flex items-center gap-3">
-              <div>
-                <div className="text-[10px] text-muted-dark font-mono tracking-widest uppercase">Import Data</div>
-                <div className="text-xs text-muted mt-0.5">{lastImport ? `Last import: ${lastImport}` : "Samsung · Apple · Google Takeout"}</div>
+            <div className="card px-4 py-2 flex items-center gap-3 min-w-0 w-full sm:w-auto">
+              <div className="min-w-0">
+                <div className="text-[10px] text-muted-dark font-mono tracking-widest uppercase whitespace-nowrap">Import Data</div>
+                <div className="text-xs text-muted mt-0.5 whitespace-nowrap">{lastImport ? `Last import: ${lastImport}` : "Samsung · Apple · Google Takeout"}</div>
               </div>
-              <label className="cursor-pointer">
+              <label className="cursor-pointer shrink-0">
                 <input
                   type="file"
                   accept=".zip,.csv,.xml,.json"
@@ -856,11 +856,11 @@ const todayScore = completedToday.reduce((sum, l) => {
               />
             </div>
           </div>
-          <div className="flex justify-end mt-4">
+          <div className="flex mt-4">
             <button
               onClick={saveMacros}
               disabled={savingMacros}
-              className="bg-accent-teal text-black font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-all"
+              className="w-full bg-accent-teal text-black font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-all disabled:opacity-60"
             >
               {savingMacros ? "Saving..." : "Save Macros"}
             </button>
