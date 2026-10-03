@@ -74,12 +74,13 @@ export default function DashboardPage() {
     if (!user) return;
 
     const fetchData = async () => {
-      const [habitsRes, logsRes, sleepRes, freezesRes, macrosRes] = await Promise.all([
+      const [habitsRes, logsRes, sleepRes, freezesRes, macrosRes, workoutRes] = await Promise.all([
         supabase.from("habits").select("*").eq("user_id", user.id).order("order"),
         supabase.from("habit_logs").select("*").eq("user_id", user.id),
         supabase.from("sleep_logs").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(90),
         supabase.from("streak_freezes").select("*").eq("user_id", user.id),
         supabase.from("macro_logs").select("*").eq("user_id", user.id).eq("date", today),
+        supabase.from("workout_logs").select("*").eq("user_id", user.id).eq("date", today).limit(1),
       ]);
 
       if (habitsRes.data) setHabits(habitsRes.data);
@@ -94,6 +95,9 @@ export default function DashboardPage() {
         if (todaySleep) setSleepHours(todaySleep.hours.toString());
       }
       if (freezesRes.data) setFreezes(freezesRes.data);
+      if (workoutRes.data && workoutRes.data.length > 0) {
+        setTodayWorkout(workoutRes.data[0].split);
+      }
 
       // Pre-fill steps / water for today
       if (logsRes.data && habitsRes.data) {
@@ -224,7 +228,26 @@ export default function DashboardPage() {
 
   const setWorkoutSplit = async (value: string) => {
     setTodayWorkout(value);
-    if (!value || value === "Rest") return;
+
+    // Persist selected split for today so it survives refreshes
+    const { data: existingWorkout } = await supabase
+      .from("workout_logs")
+      .select("*")
+      .eq("user_id", user!.id)
+      .eq("date", today)
+      .maybeSingle();
+
+    if (existingWorkout) {
+      await supabase.from("workout_logs").update({ split: value }).eq("id", existingWorkout.id);
+    } else if (value) {
+      await supabase.from("workout_logs").insert({ user_id: user!.id, date: today, split: value });
+    }
+
+    if (!value || value === "Rest") {
+      router.refresh();
+      window.dispatchEvent(new Event("winter-data-changed"));
+      return;
+    }
 
     const habit = habits.find((h) => h.name === "Workout / Exercise");
     if (!habit) return;

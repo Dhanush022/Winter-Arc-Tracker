@@ -5,10 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
-import { calculateStreak } from "@/lib/utils";
+import { calculateStreak, getToday } from "@/lib/utils";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { isHiddenHabit } from "@/lib/types";
-import type { UserProfile, Habit, HabitLog, SleepLog, MacroLog, WeeklyCheckin, StreakFreeze } from "@/lib/types";
+import type { UserProfile, Habit, HabitLog, SleepLog, MacroLog, WeeklyCheckin, StreakFreeze, WorkoutLog } from "@/lib/types";
 import { getCached, setCached } from "@/lib/cache";
 
 interface PageCache {
@@ -19,6 +19,7 @@ interface PageCache {
   macros: MacroLog[];
   checkins: WeeklyCheckin[];
   freezes: StreakFreeze[];
+  workouts: WorkoutLog[];
 }
 
 export default function UserSummaryPage() {
@@ -38,6 +39,7 @@ export default function UserSummaryPage() {
   const [macros, setMacros] = useState<MacroLog[]>(cached?.macros ?? []);
   const [checkins, setCheckins] = useState<WeeklyCheckin[]>(cached?.checkins ?? []);
   const [freezes, setFreezes] = useState<StreakFreeze[]>(cached?.freezes ?? []);
+  const [workouts, setWorkouts] = useState<WorkoutLog[]>(cached?.workouts ?? []);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/");
@@ -46,7 +48,7 @@ export default function UserSummaryPage() {
   useEffect(() => {
     if (!user || !userId) return;
     const fetchAll = async () => {
-      const [p, h, l, s, m, c, f] = await Promise.all([
+      const [p, h, l, s, m, c, f, w] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", userId).single(),
         supabase.from("habits").select("*").eq("user_id", userId),
         supabase.from("habit_logs").select("*").eq("user_id", userId),
@@ -54,6 +56,7 @@ export default function UserSummaryPage() {
         supabase.from("macro_logs").select("*").eq("user_id", userId).order("date", { ascending: true }),
         supabase.from("weekly_checkins").select("*").eq("user_id", userId),
         supabase.from("streak_freezes").select("*").eq("user_id", userId),
+        supabase.from("workout_logs").select("*").eq("user_id", userId).order("date", { ascending: true }),
       ]);
       setProfile(p.data);
       setHabits(h.data || []);
@@ -62,6 +65,7 @@ export default function UserSummaryPage() {
       setMacros(m.data || []);
       setCheckins(c.data || []);
       setFreezes(f.data || []);
+      setWorkouts(w.data || []);
       setLoading(false);
       setCached(cacheKey, {
         profile: p.data ?? null,
@@ -71,6 +75,7 @@ export default function UserSummaryPage() {
         macros: m.data || [],
         checkins: c.data || [],
         freezes: f.data || [],
+        workouts: w.data || [],
       });
     };
     fetchAll();
@@ -110,6 +115,17 @@ export default function UserSummaryPage() {
       }
     : { protein: 0, carbs: 0, fat: 0, calories: 0 };
 
+  const todayStr = getToday();
+  const todayWorkout = workouts.find((w) => w.date === todayStr);
+  const latestWorkout = workouts.length > 0 ? workouts[workouts.length - 1] : null;
+
+  const workoutData = Object.entries(
+    workouts.reduce<Record<string, number>>((acc, w) => {
+      acc[w.split] = (acc[w.split] || 0) + 1;
+      return acc;
+    }, {})
+  ).map(([split, count]) => ({ split, count }));
+
   const sleepData = sleeps.slice(-21).map((s) => ({
     date: new Date(s.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     hours: s.hours,
@@ -147,6 +163,13 @@ export default function UserSummaryPage() {
               </h1>
               <p className="text-muted text-sm font-mono uppercase tracking-wider">
                 Goal: {profile.goal_mode} · Day-one habits: {visibleHabits.length}
+              </p>
+              <p className="text-muted text-sm mt-1">
+                {todayWorkout
+                  ? `Today: ${todayWorkout.split}`
+                  : latestWorkout
+                    ? `Last workout: ${latestWorkout.split} on ${new Date(latestWorkout.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                    : "No workout logs yet"}
               </p>
             </div>
           </div>
@@ -195,6 +218,20 @@ export default function UserSummaryPage() {
                   <Bar dataKey="protein" fill="#ea580c" name="Protein" />
                   <Bar dataKey="carbs" fill="#6b7280" name="Carbs" />
                   <Bar dataKey="fat" fill="#fafafa" name="Fat" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="card p-5">
+            <h3 className="text-sm font-bold text-white mb-4">Workout Splits</h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={workoutData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                  <XAxis dataKey="split" stroke="#525252" fontSize={10} />
+                  <YAxis allowDecimals={false} stroke="#525252" fontSize={10} />
+                  <Tooltip contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "8px" }} />
+                  <Bar dataKey="count" fill="#ea580c" name="Days" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

@@ -49,6 +49,13 @@ export interface MacroLog {
   calories: number;
 }
 
+export interface WorkoutLog {
+  id: string;
+  user_id: string;
+  date: string;
+  split: string;
+}
+
 export interface MoodLog {
   id: string;
   user_id: string;

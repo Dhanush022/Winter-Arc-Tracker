@@ -60,6 +60,16 @@ CREATE TABLE IF NOT EXISTS macro_logs (
   UNIQUE(user_id, date)
 );
 
+-- Workout split logs table
+CREATE TABLE IF NOT EXISTS workout_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  split TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, date)
+);
+
 -- Mood logs table
 CREATE TABLE IF NOT EXISTS mood_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -118,6 +128,7 @@ ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE habit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sleep_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE macro_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workout_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mood_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE weekly_checkins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE monthly_reflections ENABLE ROW LEVEL SECURITY;
@@ -151,6 +162,12 @@ CREATE POLICY "Macro logs are viewable by everyone" ON macro_logs FOR SELECT USI
 CREATE POLICY "Users can insert own macro logs" ON macro_logs FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own macro logs" ON macro_logs FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own macro logs" ON macro_logs FOR DELETE USING (auth.uid() = user_id);
+
+-- Workout logs: everyone can view (needed for leaderboard/profile), users manage their own
+CREATE POLICY "Workout logs are viewable by everyone" ON workout_logs FOR SELECT USING (true);
+CREATE POLICY "Users can insert own workout logs" ON workout_logs FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own workout logs" ON workout_logs FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own workout logs" ON workout_logs FOR DELETE USING (auth.uid() = user_id);
 
 -- Mood logs: users can only manage their own logs
 CREATE POLICY "Users can view own mood logs" ON mood_logs FOR SELECT USING (auth.uid() = user_id);
