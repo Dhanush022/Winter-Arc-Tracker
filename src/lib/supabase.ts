@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { Capacitor } from "@capacitor/core";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -14,7 +15,9 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: Capacitor.isNativePlatform()
+        ? "com.winterarc.tracker://auth/callback"
+        : `${window.location.origin}/auth/callback`,
     },
   });
   return { data, error };
@@ -34,7 +37,9 @@ export async function signUpWithEmail(email: string, password: string, name: str
     password,
     options: {
       data: { full_name: name },
-      emailRedirectTo: `${window.location.origin}/auth/callback`,
+      emailRedirectTo: Capacitor.isNativePlatform()
+        ? "com.winterarc.tracker://auth/callback"
+        : `${window.location.origin}/auth/callback`,
     },
   });
   return { data, error };

@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { Capacitor } from "@capacitor/core";
+import { App } from "@capacitor/app";
 import type { User } from "@supabase/supabase-js";
 import type { UserProfile } from "@/lib/types";
 
@@ -58,6 +60,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let removeListener: (() => void) | undefined;
+
+    (async () => {
+      const handle = await App.addListener("appUrlOpen", async ({ url }) => {
+        try {
+          const urlObj = new URL(url);
+          const code = urlObj.searchParams.get("code");
+          if (code) {
+            await supabase.auth.exchangeCodeForSession(code);
+            window.location.href = "/dashboard";
+          }
+        } catch (err) {
+          console.error("Deep link auth failed", err);
+        }
+      });
+      removeListener = () => handle.remove();
+    })();
+
+    return () => removeListener?.();
   }, []);
 
   return (
