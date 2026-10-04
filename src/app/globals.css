@@ -52,7 +52,7 @@ body {
 
 /* Mobile: bottom Sable dock */
 .winter-dock-mobile .animated-top-dock-component {
-  height: 72px;
+  height: 88px;
   background: transparent;
 }
 .winter-dock-mobile .animated-top-dock-component::after {
@@ -62,27 +62,30 @@ body {
   display: none;
 }
 .winter-dock-mobile .animated-top-dock__nav {
-  position: absolute;
+  position: fixed;
   top: auto;
-  bottom: 10px;
-  left: 10px;
-  right: 10px;
+  bottom: 0;
+  left: 0;
+  right: 0;
   transform: none;
   justify-content: space-around;
-  gap: 2px;
+  gap: 0;
+  min-height: 72px;
+  padding: 8px 0 12px;
+  border-radius: 0;
 }
 .winter-dock-mobile .animated-top-dock__link {
   width: auto;
-  padding: 0 6px;
-  gap: 4px;
-  font-size: 8px;
+  padding: 6px 10px;
+  gap: 5px;
+  font-size: 9px;
 }
 .winter-dock-mobile .animated-top-dock__item {
-  padding: 0 4px;
+  padding: 0 6px;
 }
 .winter-dock-mobile .animated-top-dock__icon {
-  width: 11px;
-  height: 11px;
+  width: 14px;
+  height: 14px;
 }
 
 @layer utilities {
