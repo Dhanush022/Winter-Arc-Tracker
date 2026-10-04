@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
+import MetricSlider from "@/components/MetricSlider";
 import { useRouter } from "next/navigation";
 import { getCached, setCached } from "@/lib/cache";
 import { motion, AnimatePresence } from "framer-motion";
@@ -252,16 +253,13 @@ export default function HabitsPage() {
                 <span className="text-base text-muted">👟 Steps</span>
                 <span className="text-xs font-mono text-accent-orange">+{stepPts}</span>
               </div>
-              <input
-                type="range"
+              <MetricSlider
+                value={todaySteps}
                 min={0}
                 max={10000}
                 step={500}
-                value={todaySteps}
-                onChange={(e) => setTodaySteps(Number(e.target.value))}
-                onPointerUp={() => persistMetricHere("10,000 Steps", { steps: todaySteps }, todaySteps)}
-                onKeyUp={() => persistMetricHere("10,000 Steps", { steps: todaySteps }, todaySteps)}
-                className="w-full accent-orange-500"
+                onChange={(v) => setTodaySteps(v)}
+                onCommit={(v) => persistMetricHere("10,000 Steps", { steps: v }, v)}
               />
               <div className="text-xs text-muted-dark font-mono mt-1">{todaySteps.toLocaleString()} / 10,000</div>
             </div>
@@ -270,16 +268,13 @@ export default function HabitsPage() {
                 <span className="text-base text-muted">💧 Water</span>
                 <span className="text-xs font-mono text-accent-orange">+{waterPts}</span>
               </div>
-              <input
-                type="range"
+              <MetricSlider
+                value={todayWater}
                 min={0}
                 max={4000}
                 step={100}
-                value={todayWater}
-                onChange={(e) => setTodayWater(Number(e.target.value))}
-                onPointerUp={() => persistMetricHere("Drink 3L Water", { water: todayWater }, todayWater)}
-                onKeyUp={() => persistMetricHere("Drink 3L Water", { water: todayWater }, todayWater)}
-                className="w-full accent-orange-500"
+                onChange={(v) => setTodayWater(v)}
+                onCommit={(v) => persistMetricHere("Drink 3L Water", { water: v }, v)}
               />
               <div className="text-xs text-muted-dark font-mono mt-1">{(todayWater / 1000).toFixed(1)}L / 4.0L</div>
             </div>
@@ -288,16 +283,13 @@ export default function HabitsPage() {
                 <span className="text-base text-muted">😴 Sleep</span>
                 <span className="text-xs font-mono text-accent-orange">+{sleepPts}</span>
               </div>
-              <input
-                type="range"
+              <MetricSlider
+                value={Number(sleepHours) || 0}
                 min={0}
                 max={12}
                 step={0.5}
-                value={Number(sleepHours) || 0}
-                onChange={(e) => setSleepHours(e.target.value)}
-                onPointerUp={() => upsertSleepHere(today, Math.max(0, Number(sleepHours) || 0))}
-                onKeyUp={() => upsertSleepHere(today, Math.max(0, Number(sleepHours) || 0))}
-                className="w-full accent-orange-500"
+                onChange={(v) => setSleepHours(String(v))}
+                onCommit={(v) => upsertSleepHere(today, v)}
               />
               <div className="text-xs text-muted-dark font-mono mt-1">{(Number(sleepHours) || 0).toFixed(1)} h</div>
             </div>

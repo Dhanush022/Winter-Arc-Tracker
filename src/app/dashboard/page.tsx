@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 import LeaderboardList from "@/components/LeaderboardList";
+import MetricSlider from "@/components/MetricSlider";
 import { GalleryHeading } from "@/shaders/neuform-isolated/NeuformIsolatedEffects";
 import "@/shaders/threeui.css";
 import { useRouter } from "next/navigation";
@@ -631,16 +632,13 @@ const todayScore = completedToday.reduce((sum, l) => {
                         <span className="text-base text-muted">👟 Steps</span>
                         <span className="text-xs font-mono uppercase tracking-wider text-accent-orange">+{stepPts}</span>
                       </div>
-                      <input
-                        type="range"
+                      <MetricSlider
+                        value={todaySteps}
                         min={0}
                         max={10000}
                         step={500}
-                        value={todaySteps}
-                        onChange={(e) => setTodaySteps(Number(e.target.value))}
-                        onPointerUp={() => persistMetric("10,000 Steps", { steps: todaySteps }, todaySteps)}
-                        onKeyUp={() => persistMetric("10,000 Steps", { steps: todaySteps }, todaySteps)}
-                        className="w-full accent-orange-500"
+                        onChange={(v) => setTodaySteps(v)}
+                        onCommit={(v) => persistMetric("10,000 Steps", { steps: v }, v)}
                       />
                       <div className="text-xs text-muted-dark font-mono mt-1">{todaySteps.toLocaleString()} / 10,000</div>
                     </motion.div>
@@ -657,16 +655,13 @@ const todayScore = completedToday.reduce((sum, l) => {
                         <span className="text-base text-muted">💧 Water</span>
                         <span className="text-xs font-mono uppercase tracking-wider text-accent-orange">+{waterPts}</span>
                       </div>
-                      <input
-                        type="range"
+                      <MetricSlider
+                        value={todayWater}
                         min={0}
                         max={4000}
                         step={100}
-                        value={todayWater}
-                        onChange={(e) => setTodayWater(Number(e.target.value))}
-                        onPointerUp={() => persistMetric("Drink 3L Water", { water: todayWater }, todayWater)}
-                        onKeyUp={() => persistMetric("Drink 3L Water", { water: todayWater }, todayWater)}
-                        className="w-full accent-orange-500"
+                        onChange={(v) => setTodayWater(v)}
+                        onCommit={(v) => persistMetric("Drink 3L Water", { water: v }, v)}
                       />
                       <div className="text-xs text-muted-dark font-mono mt-1">{(todayWater / 1000).toFixed(1)}L / 4.0L</div>
                     </motion.div>
@@ -706,16 +701,13 @@ const todayScore = completedToday.reduce((sum, l) => {
                 <span className="text-base text-muted">😴 Sleep</span>
                 <span className="text-xs font-mono uppercase tracking-wider text-accent-orange">+{sleepPts}</span>
               </div>
-              <input
-                type="range"
+              <MetricSlider
+                value={Number(sleepHours) || 0}
                 min={0}
                 max={12}
                 step={0.5}
-                value={Number(sleepHours) || 0}
-                onChange={(e) => setSleepHours(e.target.value)}
-                onPointerUp={() => upsertSleepForDate(today, Math.max(0, Number(sleepHours) || 0))}
-                onKeyUp={() => upsertSleepForDate(today, Math.max(0, Number(sleepHours) || 0))}
-                className="w-full accent-orange-500"
+                onChange={(v) => setSleepHours(String(v))}
+                onCommit={(v) => upsertSleepForDate(today, v)}
               />
               <div className="text-xs text-muted-dark font-mono mt-1">{(Number(sleepHours) || 0).toFixed(1)} h</div>
             </div>
