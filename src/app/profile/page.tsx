@@ -34,6 +34,9 @@ export default function ProfilePage() {
   const [customHabit1, setCustomHabit1] = useState("");
   const [customHabit2, setCustomHabit2] = useState("");
   const [customHabitIds, setCustomHabitIds] = useState<{ id: string }[]>([]);
+  const [publicProfile, setPublicProfile] = useState(true);
+  const [accentColor, setAccentColor] = useState("#ea580c");
+  const [seasonTheme, setSeasonTheme] = useState("winter");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -53,6 +56,9 @@ export default function ProfilePage() {
         setCarbs(profile.macro_targets.carbs.toString());
         setFat(profile.macro_targets.fat.toString());
         setCalories(profile.macro_targets.calories.toString());
+        setPublicProfile(profile.public_profile ?? true);
+        setAccentColor(profile.accent_color || "#ea580c");
+        setSeasonTheme(profile.season_theme || "winter");
       }
 
       const { data: customHabits } = await supabase
@@ -98,6 +104,9 @@ export default function ProfilePage() {
         full_name: fullName,
         avatar_color: avatarColor,
         goal_mode: goalMode,
+        public_profile: publicProfile,
+        accent_color: accentColor,
+        season_theme: seasonTheme,
         macro_targets: {
           protein: Math.max(0, Number(protein) || 0),
           carbs: Math.max(0, Number(carbs) || 0),
@@ -232,6 +241,52 @@ export default function ProfilePage() {
                 </div>
               </div>
 
+              {/* Public profile */}
+              <div>
+                <label className="block text-xs text-muted-dark font-mono uppercase tracking-wider mb-2 tracking-widest">PUBLIC PROFILE</label>
+                <button
+                  type="button"
+                  onClick={() => setPublicProfile(!publicProfile)}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-all border",
+                    publicProfile
+                      ? "bg-accent-teal/10 text-accent-teal border-accent-teal/30"
+                      : "text-muted border-surface-border hover:text-white"
+                  )}
+                >
+                  {publicProfile ? "Visible on leaderboard" : "Hidden from leaderboard"}
+                </button>
+              </div>
+
+              {/* Appearance */}
+              <div>
+                <label className="block text-xs text-muted-dark font-mono uppercase tracking-wider mb-2 tracking-widest">APPEARANCE</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] text-muted-dark font-mono mb-1">ACCENT COLOR</label>
+                    <input
+                      type="color"
+                      value={accentColor}
+                      onChange={(e) => setAccentColor(e.target.value)}
+                      className="w-full h-10 rounded-lg border border-surface-border bg-surface-light"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-muted-dark font-mono mb-1">SEASON THEME</label>
+                    <select
+                      value={seasonTheme}
+                      onChange={(e) => setSeasonTheme(e.target.value)}
+                      className="input-field w-full"
+                    >
+                      <option value="winter">Winter</option>
+                      <option value="midnight">Midnight</option>
+                      <option value="gold">Gold</option>
+                      <option value="obsidian">Obsidian</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               {/* Name */}
               <div>
                 <label className="block text-xs text-muted-dark font-mono uppercase tracking-wider mb-1 tracking-widest">FULL NAME</label>
@@ -361,6 +416,37 @@ export default function ProfilePage() {
         {/* Check-ins Tab */}
         {activeTab === "checkins" && (
           <div className="space-y-3">
+            {(() => {
+              const logged = checkins.filter((c) => c.weight != null && c.weight > 0);
+              const latest = logged.length > 0 ? logged[logged.length - 1] : null;
+              const first = logged.length > 0 ? logged[0] : null;
+              const avgWeight = logged.length > 0
+                ? logged.reduce((sum, c) => sum + Number(c.weight || 0), 0) / logged.length
+                : 0;
+              return (
+                <div className="card p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div>
+                    <div className="text-[10px] text-muted-dark font-mono tracking-widest uppercase mb-1">Latest Weight</div>
+                    <div className="text-2xl font-bold text-white">{latest ? `${latest.weight} kg` : "—"}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-muted-dark font-mono tracking-widest uppercase mb-1">Weight Change</div>
+                    <div className="text-2xl font-bold text-white">
+                      {latest && first ? `${((latest.weight ?? 0) - (first.weight ?? 0)).toFixed(1)} kg` : "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-muted-dark font-mono tracking-widest uppercase mb-1">Average Weight</div>
+                    <div className="text-2xl font-bold text-white">{avgWeight > 0 ? `${avgWeight.toFixed(1)} kg` : "—"}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-muted-dark font-mono tracking-widest uppercase mb-1">Check-ins</div>
+                    <div className="text-2xl font-bold text-white">{checkins.length}/13</div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {Array.from({ length: 13 }, (_, i) => i + 1).map((week) => {
               const checkin = checkins.find((c) => c.week === week);
               return (

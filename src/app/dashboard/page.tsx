@@ -41,6 +41,15 @@ export default function DashboardPage() {
   const [, setLoading] = useState(() => getCached("dashboard") === undefined);
   const [showFreezeModal, setShowFreezeModal] = useState(false);
   const [todayWorkout, setTodayWorkout] = useState("");
+  const [routineSplit, setRoutineSplit] = useState("");
+  const [routineText, setRoutineText] = useState("");
+  const [savingRoutine, setSavingRoutine] = useState(false);
+  const [liftExercise, setLiftExercise] = useState("");
+  const [liftSets, setLiftSets] = useState("");
+  const [liftReps, setLiftReps] = useState("");
+  const [liftWeight, setLiftWeight] = useState("");
+  const [workoutEntries, setWorkoutEntries] = useState<{ id: string; exercise: string; sets: number; reps: number; weight: number; date: string }[]>([]);
+  const [routines, setRoutines] = useState<{ id: string; split: string; exercises: { name: string }[] }[]>([]);
 
   // Sleep field
   const [sleepHours, setSleepHours] = useState("");
@@ -75,13 +84,15 @@ export default function DashboardPage() {
     if (!user) return;
 
     const fetchData = async () => {
-      const [habitsRes, logsRes, sleepRes, freezesRes, macrosRes, workoutRes] = await Promise.all([
+      const [habitsRes, logsRes, sleepRes, freezesRes, macrosRes, workoutRes, routineRes, entriesRes] = await Promise.all([
         supabase.from("habits").select("*").eq("user_id", user.id).order("order"),
         supabase.from("habit_logs").select("*").eq("user_id", user.id),
         supabase.from("sleep_logs").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(90),
         supabase.from("streak_freezes").select("*").eq("user_id", user.id),
         supabase.from("macro_logs").select("*").eq("user_id", user.id).eq("date", today),
         supabase.from("workout_logs").select("*").eq("user_id", user.id).eq("date", today).limit(1),
+        supabase.from("workout_routines").select("*").eq("user_id", user.id).order("split"),
+        supabase.from("workout_entries").select("*").eq("user_id", user.id).eq("date", today).order("created_at", { ascending: true }),
       ]);
 
       if (habitsRes.data) setHabits(habitsRes.data);
@@ -98,7 +109,16 @@ export default function DashboardPage() {
       if (freezesRes.data) setFreezes(freezesRes.data);
       if (workoutRes.data && workoutRes.data.length > 0) {
         setTodayWorkout(workoutRes.data[0].split);
+        setRoutineSplit(workoutRes.data[0].split);
       }
+      if (routineRes.data) {
+        setRoutines(routineRes.data);
+        const todayRoutine = routineRes.data.find((r) => r.split === workoutRes.data?.[0]?.split);
+        if (todayRoutine?.exercises) {
+          setRoutineText((todayRoutine.exercises as { name: string }[]).map((e) => e.name).join("\n"));
+        }
+      }
+      if (entriesRes.data) setWorkoutEntries(entriesRes.data);
 
       // Pre-fill steps / water for today
       if (logsRes.data && habitsRes.data) {
@@ -132,6 +152,15 @@ export default function DashboardPage() {
     window.addEventListener("winter-data-changed", fetchData);
     return () => window.removeEventListener("winter-data-changed", fetchData);
   }, [user, today]);
+
+  useEffect(() => {
+    const routine = routines.find((r) => r.split === routineSplit);
+    if (routine?.exercises) {
+      setRoutineText((routine.exercises as { name: string }[]).map((e) => e.name).join("\n"));
+    } else {
+      setRoutineText("");
+    }
+  }, [routineSplit, routines]);
 
   const toggleHabit = async (habitId: string) => {
     const existing = allLogs.find((l) => l.habit_id === habitId && l.date === today);
@@ -269,6 +298,56 @@ export default function DashboardPage() {
     }
 
     router.refresh();
+    window.dispatchEvent(new Event("winter-data-changed"));
+  };
+
+  const saveRoutine = async () => {
+    setSavingRoutine(true);
+    const exercises = routineText
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((name) => ({ name }));
+
+    const existing = routines.find((r) => r.split === routineSplit);
+    if (existing) {
+      await supabase.from("workout_routines").update({ exercises }).eq("id", existing.id);
+      setRoutines((prev) => prev.map((r) => (r.id === existing.id ? { ...r, exercises } : r)));
+    } else if (routineSplit) {
+      const { data } = await supabase
+        .from("workout_routines")
+        .insert({ user_id: user!.id, split: routineSplit, exercises })
+        .select()
+        .single();
+      if (data) setRoutines((prev) => [...prev, data]);
+    }
+    setSavingRoutine(false);
+    window.dispatchEvent(new Event("winter-data-changed"));
+  };
+
+  const addLiftEntry = async () => {
+    if (!liftExercise.trim()) return;
+    const existing = workoutEntries.find((e) => e.exercise.toLowerCase() === liftExercise.trim().toLowerCase() && e.date === today);
+    const payload = {
+      user_id: user!.id,
+      date: today,
+      split: routineSplit || todayWorkout || "Custom",
+      exercise: liftExercise.trim(),
+      sets: Math.max(0, Number(liftSets) || 0),
+      reps: Math.max(0, Number(liftReps) || 0),
+      weight: Math.max(0, Number(liftWeight) || 0),
+    };
+    if (existing) {
+      await supabase.from("workout_entries").update(payload).eq("id", existing.id);
+      setWorkoutEntries((prev) => prev.map((e) => (e.id === existing.id ? { ...e, ...payload } : e)));
+    } else {
+      const { data } = await supabase.from("workout_entries").insert(payload).select().single();
+      if (data) setWorkoutEntries((prev) => [...prev, data]);
+    }
+    setLiftExercise("");
+    setLiftSets("");
+    setLiftReps("");
+    setLiftWeight("");
     window.dispatchEvent(new Event("winter-data-changed"));
   };
 
@@ -602,6 +681,29 @@ const todayScore = completedToday.reduce((sum, l) => {
           </div>
         </div>
 
+        {/* Daily Summary */}
+        <div className="card p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-white tracking-tight">TODAY&apos;S SUMMARY</h2>
+            <span className="text-xs text-muted-dark font-mono">{todayScore} pts</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-center">
+            {[
+              { label: "Workout", value: todayWorkout || "—" },
+              { label: "Sleep", value: `${(Number(sleepHours) || 0).toFixed(1)}h` },
+              { label: "Steps", value: todaySteps.toLocaleString() },
+              { label: "Water", value: `${(todayWater / 1000).toFixed(1)}L` },
+              { label: "Protein", value: `${Number(macroProtein) || 0}g` },
+              { label: "Calories", value: `${Number(macroCalories) || 0}` },
+            ].map((item) => (
+              <div key={item.label} className="p-2 rounded-lg border border-surface-border bg-surface-light/50">
+                <div className="text-[10px] text-muted-dark font-mono uppercase tracking-widest">{item.label}</div>
+                <div className="text-sm text-white font-semibold truncate">{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
           {/* Daily Commitments */}
@@ -804,6 +906,88 @@ const todayScore = completedToday.reduce((sum, l) => {
                 </motion.p>
               )}
             </div>
+
+            {/* Routine Builder */}
+            <div className="card p-5">
+              <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono mb-2">ROUTINE BUILDER</div>
+              <select
+                value={routineSplit}
+                onChange={(e) => setRoutineSplit(e.target.value)}
+                className="input-field w-full mb-3"
+              >
+                <option value="">Choose split…</option>
+                <option value="Push">Push</option>
+                <option value="Pull">Pull</option>
+                <option value="Legs">Legs</option>
+                <option value="Upper">Upper</option>
+                <option value="Lower">Lower</option>
+                <option value="Rest">Rest</option>
+              </select>
+              <textarea
+                value={routineText}
+                onChange={(e) => setRoutineText(e.target.value)}
+                placeholder="Bench Press&#10;Incline Dumbbell Press&#10;Push-ups"
+                rows={4}
+                className="input-field w-full mb-3"
+              />
+              <button
+                onClick={saveRoutine}
+                disabled={savingRoutine || !routineSplit}
+                className="w-full bg-accent-teal text-black font-semibold px-4 py-2.5 rounded-lg hover:opacity-90 transition-all disabled:opacity-60"
+              >
+                {savingRoutine ? "Saving…" : "Save Routine"}
+              </button>
+            </div>
+
+            {/* Progressive Overload */}
+            <div className="card p-5">
+              <div className="text-[10px] text-muted-dark font-mono tracking-widest font-mono mb-2">LOG LIFTS</div>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <input
+                  value={liftExercise}
+                  onChange={(e) => setLiftExercise(e.target.value)}
+                  placeholder="Exercise"
+                  className="input-field w-full col-span-2"
+                />
+                <input
+                  type="number" min="0"
+                  value={liftSets}
+                  onChange={(e) => setLiftSets(e.target.value)}
+                  placeholder="Sets"
+                  className="input-field w-full"
+                />
+                <input
+                  type="number" min="0"
+                  value={liftReps}
+                  onChange={(e) => setLiftReps(e.target.value)}
+                  placeholder="Reps"
+                  className="input-field w-full"
+                />
+                <input
+                  type="number" min="0" step="0.5"
+                  value={liftWeight}
+                  onChange={(e) => setLiftWeight(e.target.value)}
+                  placeholder="Weight (kg)"
+                  className="input-field w-full col-span-2"
+                />
+              </div>
+              <button
+                onClick={addLiftEntry}
+                className="w-full bg-accent-teal text-black font-semibold px-4 py-2.5 rounded-lg hover:opacity-90 transition-all"
+              >
+                Log Entry
+              </button>
+              {workoutEntries.length > 0 && (
+                <div className="mt-3 space-y-1 text-xs text-muted">
+                  {workoutEntries.map((entry) => (
+                    <div key={entry.id} className="flex justify-between">
+                      <span>{entry.exercise}</span>
+                      <span className="font-mono">{entry.sets}x{entry.reps} @ {entry.weight}kg</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -915,6 +1099,30 @@ const todayScore = completedToday.reduce((sum, l) => {
           <div className="text-accent-orange text-xs tracking-widest mb-2">THE PUBLIC RANKS</div>
           <h2 className="text-2xl font-bold tracking-tighter text-white mb-4">WHO KEPT <span className="italic font-serif font-normal text-white/70">THEIR WORD?</span></h2>
           <LeaderboardList />
+        </div>
+
+        {/* Consistency Heatmap */}
+        <div className="card p-5 mb-8">
+          <h2 className="text-sm font-bold text-white mb-4">CONSISTENCY HEATMAP</h2>
+          <div className="flex gap-1 overflow-x-auto pb-2">
+            {Array.from({ length: 90 }, (_, i) => {
+              const d = new Date();
+              d.setDate(d.getDate() - (89 - i));
+              const dateStr = d.toISOString().split("T")[0];
+              const completedForDay = allLogs.filter((l) => l.date === dateStr && l.completed).length;
+              const totalForDay = visibleHabits.length;
+              const pct = totalForDay > 0 ? completedForDay / totalForDay : 0;
+              const color = pct >= 1 ? "#ea580c" : pct >= 0.66 ? "#c2410c" : pct >= 0.33 ? "#7c2d12" : pct > 0 ? "#431407" : "#1a1a1a";
+              return (
+                <div
+                  key={dateStr}
+                  title={`${dateStr}: ${completedForDay}/${totalForDay}`}
+                  className="w-4 h-4 rounded-sm shrink-0"
+                  style={{ backgroundColor: color }}
+                />
+              );
+            })}
+          </div>
         </div>
 
         {/* Footer */}

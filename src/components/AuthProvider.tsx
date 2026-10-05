@@ -63,6 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!profile) return;
+
+    document.documentElement.style.setProperty("--accent-orange", profile.accent_color || "#ea580c");
+    document.documentElement.dataset.season = profile.season_theme || "winter";
+  }, [profile]);
+
+  useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
     let removeListener: (() => void) | undefined;

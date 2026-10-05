@@ -11,6 +11,9 @@ export interface UserProfile {
     fat: number;
     calories: number;
   };
+  public_profile?: boolean;
+  season_theme?: string;
+  accent_color?: string;
   created_at: string;
 }
 

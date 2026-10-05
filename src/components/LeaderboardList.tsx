@@ -19,7 +19,7 @@ export default function LeaderboardList() {
     const fetchLeaderboard = async () => {
       setLoading(true);
 
-      const { data: profiles } = await supabase.from("profiles").select("*");
+      const { data: profiles } = await supabase.from("profiles").select("*").eq("public_profile", true);
       const { data: habitLogs } = await supabase.from("habit_logs").select("*").eq("completed", true);
       const { data: habits } = await supabase.from("habits").select("*");
       const { data: sleepLogs } = await supabase.from("sleep_logs").select("*");

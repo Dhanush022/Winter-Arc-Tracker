@@ -99,6 +99,19 @@ export default function UserSummaryPage() {
   const visibleHabits = habits.filter(
     (h) => !isHiddenHabit(h)
   );
+
+  if (profile.public_profile === false && profile.id !== user?.id) {
+    return (
+      <div className="min-h-screen pt-16 sm:pt-20 pb-24 sm:pb-8 px-4">
+        <Navbar />
+        <div className="max-w-3xl mx-auto card p-6 text-center">
+          <h1 className="text-2xl font-bold text-white mb-2">Profile is private</h1>
+          <p className="text-muted">This user chose to hide their public profile.</p>
+        </div>
+      </div>
+    );
+  }
+
   const streak = calculateStreak(logs, visibleHabits.length);
   const habitCompletionPct = visibleHabits.length && logs.length
     ? Math.round((logs.filter((l) => l.completed).length / (90 * visibleHabits.length)) * 100)
